@@ -193,7 +193,7 @@ function createPropertyOwnersSection() {
                         </div>
                         <div class="absolute -bottom-6 -right-6 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl max-w-xs border border-slate-100 dark:border-slate-700 hidden md:block">
                             <p class="text-sm font-medium text-text-muted dark:text-slate-400 mb-2">Tasa de interés desde</p>
-                            <p class="text-3xl font-black text-primary">1.2% <span class="text-lg font-normal text-text-main dark:text-white">M.V.</span></p>
+                            <p class="text-3xl font-black text-primary">1.65% <span class="text-lg font-normal text-text-main dark:text-white">M.V.</span></p>
                         </div>
                     </div>
                     <div class="w-full lg:w-1/2 lg:pl-10 order-1 lg:order-2">
@@ -231,7 +231,7 @@ function createPropertyOwnersSection() {
                         </p>
                         <div class="grid grid-cols-2 gap-4 mb-8">
                             <div class="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl">
-                                <p class="text-2xl font-bold text-text-main dark:text-white mb-1">14%</p>
+                                <p class="text-2xl font-bold text-text-main dark:text-white mb-1">19%</p>
                                 <p class="text-sm text-text-muted dark:text-slate-400">Rentabilidad E.A. Estimada</p>
                             </div>
                             <div class="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl">
