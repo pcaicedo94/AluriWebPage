@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Nosotros - Aluri</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3be3cf",
+                        "primary-dark": "#2cc1af",
+                        "background-light": "#FFFFFF",
+                        "background-subtle": "#F8FAFC",
+                        "background-dark": "#0F172A",
+                        "text-main": "#0f172a",
+                        "text-muted": "#64748b",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "sans": ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem", 
+                        "lg": "1.5rem", 
+                        "xl": "2rem", 
+                        "2xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-main antialiased selection:bg-primary selection:text-text-main">
+    <header class="fixed top-0 left-0 w-full z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 group cursor-pointer">
+                <div class="size-8 text-primary">
+                    <svg class="w-full h-full" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path clip-rule="evenodd" d="M24 4L42 14V34L24 44L6 34V14L24 4ZM24 9.5L36 16.2V31.8L24 38.5L12 31.8V16.2L24 9.5Z" fill="currentColor" fill-rule="evenodd"></path>
+                        <path d="M24 18L30 21.5V26.5L24 30L18 26.5V21.5L24 18Z" fill="currentColor"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-black tracking-tight text-text-main dark:text-white">Aluri</h1>
+            </a>
+            <nav class="hidden md:flex items-center gap-8">
+                <a class="text-sm font-medium text-text-muted hover:text-primary transition-colors dark:text-slate-300" href="index.html">Inicio</a>
+                <a class="text-sm font-medium text-text-muted hover:text-primary transition-colors dark:text-slate-300" href="inversionistas.html">Inversionistas</a>
+                <a class="text-sm font-medium text-text-muted hover:text-primary transition-colors dark:text-slate-300" href="propietarios.html">Propietarios</a>
+                <a class="text-sm font-medium text-text-main hover:text-primary transition-colors dark:text-white" href="nosotros.html">Nosotros</a>
+            </nav>
+            <div class="flex items-center gap-4">
+                <button class="hidden lg:flex items-center gap-2 text-sm font-semibold text-text-main dark:text-white hover:text-primary transition-colors">
+                    <span>Ayuda</span>
+                </button>
+                <button class="flex items-center justify-center px-6 h-10 bg-primary hover:bg-primary-dark active:scale-95 transition-all text-text-main text-sm font-bold rounded-full shadow-sm shadow-primary/30">
+                    Ingresar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative w-full overflow-hidden pt-20">
+        <!-- Hero Section -->
+        <section class="relative w-full min-h-[60vh] flex items-center bg-background-light dark:bg-background-dark">
+            <div class="absolute top-20 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] -z-10 translate-x-1/2"></div>
+            <div class="max-w-7xl mx-auto px-6 py-20 text-center">
+                <div class="max-w-4xl mx-auto">
+                    <h1 class="text-5xl lg:text-7xl font-black tracking-tight text-text-main dark:text-white leading-[1.1] mb-6">
+                        Democratizando el acceso al <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">crédito inmobiliario</span>
+                    </h1>
+                    <p class="text-xl text-text-muted dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
+                        Conectamos personas que necesitan liquidez con inversionistas que buscan rentabilidad, usando tecnología y garantías reales.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mission & Vision Section -->
+        <section class="py-24 bg-white dark:bg-background-dark">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="grid lg:grid-cols-2 gap-12">
+                    <div class="bg-background-subtle dark:bg-slate-800/50 p-10 rounded-3xl border border-slate-100 dark:border-slate-700">
+                        <div class="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center mb-6 text-primary">
+                            <span class="material-symbols-outlined text-3xl">flag</span>
+                        </div>
+                        <h2 class="text-3xl font-bold text-text-main dark:text-white mb-4">Nuestra Misión</h2>
+                        <p class="text-lg text-text-muted dark:text-slate-400 leading-relaxed">
+                            Facilitar el acceso a liquidez para propietarios de inmuebles en Colombia, mientras ofrecemos a inversionistas oportunidades de inversión seguras y rentables respaldadas por activos reales.
+                        </p>
+                    </div>
+                    <div class="bg-background-subtle dark:bg-slate-800/50 p-10 rounded-3xl border border-slate-100 dark:border-slate-700">
+                        <div class="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center mb-6 text-primary">
+                            <span class="material-symbols-outlined text-3xl">visibility</span>
+                        </div>
+                        <h2 class="text-3xl font-bold text-text-main dark:text-white mb-4">Nuestra Visión</h2>
+                        <p class="text-lg text-text-muted dark:text-slate-400 leading-relaxed">
+                            Ser la plataforma líder en América Latina de financiamiento colaborativo con garantía hipotecaria, transformando la manera en que las personas acceden al capital y generan rentabilidad.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Values Section -->
+        <section class="py-24 bg-background-subtle dark:bg-slate-900/50">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-text-main dark:text-white mb-4 tracking-tight">Nuestros Valores</h2>
+                    <p class="text-text-muted dark:text-slate-400 text-lg">Los principios que guían cada decisión que tomamos.</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-white dark:bg-slate-800/50 p-8 rounded-3xl border border-slate-100 dark:border-slate-700 text-center">
+                        <div class="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center mb-6 text-primary mx-auto">
+                            <span class="material-symbols-outlined text-3xl">verified</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-text-main dark:text-white mb-3">Transparencia</h3>
+                        <p class="text-text-muted dark:text-slate-400 leading-relaxed">
+                            Información clara y completa en cada paso del proceso. Sin letra pequeña ni sorpresas.
+                        </p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800/50 p-8 rounded-3xl border border-slate-100 dark:border-slate-700 text-center">
+                        <div class="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center mb-6 text-primary mx-auto">
+                            <span class="material-symbols-outlined text-3xl">security</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-text-main dark:text-white mb-3">Seguridad</h3>
+                        <p class="text-text-muted dark:text-slate-400 leading-relaxed">
+                            Protección de datos y transacciones con los más altos estándares de la industria financiera.
+                        </p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800/50 p-8 rounded-3xl border border-slate-100 dark:border-slate-700 text-center">
+                        <div class="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center mb-6 text-primary mx-auto">
+                            <span class="material-symbols-outlined text-3xl">bolt</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-text-main dark:text-white mb-3">Innovación</h3>
+                        <p class="text-text-muted dark:text-slate-400 leading-relaxed">
+                            Tecnología de punta para hacer más eficiente y accesible el mercado financiero inmobiliario.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="py-24 bg-white dark:bg-background-dark">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-text-main dark:text-white mb-4 tracking-tight">Aluri en Números</h2>
+                    <p class="text-text-muted dark:text-slate-400 text-lg">Resultados que respaldan nuestra trayectoria.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="text-center p-6">
+                        <p class="text-5xl font-black text-primary mb-2">$85B+</p>
+                        <p class="text-text-muted dark:text-slate-400 font-medium">Desembolsados COP</p>
+                    </div>
+                    <div class="text-center p-6">
+                        <p class="text-5xl font-black text-primary mb-2">4.5k+</p>
+                        <p class="text-text-muted dark:text-slate-400 font-medium">Usuarios Activos</p>
+                    </div>
+                    <div class="text-center p-6">
+                        <p class="text-5xl font-black text-primary mb-2">98%</p>
+                        <p class="text-text-muted dark:text-slate-400 font-medium">Satisfacción</p>
+                    </div>
+                    <div class="text-center p-6">
+                        <p class="text-5xl font-black text-primary mb-2">12</p>
+                        <p class="text-text-muted dark:text-slate-400 font-medium">Ciudades en Colombia</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Team Section -->
+        <section class="py-24 bg-background-subtle dark:bg-slate-900/50">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-text-main dark:text-white mb-4 tracking-tight">Nuestro Equipo</h2>
+                    <p class="text-text-muted dark:text-slate-400 text-lg">Expertos en finanzas, tecnología y bienes raíces trabajando juntos.</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-white dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-700 overflow-hidden group hover:shadow-lg transition-shadow">
+                        <div class="aspect-square bg-gradient-to-br from-primary/20 to-blue-500/20"></div>
+                        <div class="p-6 text-center">
+                            <h3 class="text-xl font-bold text-text-main dark:text-white mb-1">María Rodríguez</h3>
+                            <p class="text-sm text-primary font-semibold mb-2">CEO & Co-Fundadora</p>
+                            <p class="text-sm text-text-muted dark:text-slate-400">15+ años en banca de inversión y fintech</p>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-700 overflow-hidden group hover:shadow-lg transition-shadow">
+                        <div class="aspect-square bg-gradient-to-br from-emerald-500/20 to-primary/20"></div>
+                        <div class="p-6 text-center">
+                            <h3 class="text-xl font-bold text-text-main dark:text-white mb-1">Carlos Méndez</h3>
+                            <p class="text-sm text-primary font-semibold mb-2">CTO & Co-Fundador</p>
+                            <p class="text-sm text-text-muted dark:text-slate-400">Experto en blockchain y sistemas financieros</p>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-700 overflow-hidden group hover:shadow-lg transition-shadow">
+                        <div class="aspect-square bg-gradient-to-br from-blue-500/20 to-emerald-500/20"></div>
+                        <div class="p-6 text-center">
+                            <h3 class="text-xl font-bold text-text-main dark:text-white mb-1">Ana López</h3>
+                            <p class="text-sm text-primary font-semibold mb-2">Directora Legal</p>
+                            <p class="text-sm text-text-muted dark:text-slate-400">Especialista en derecho financiero y bursátil</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Regulation Section -->
+        <section class="py-24 bg-white dark:bg-background-dark">
+            <div class="max-w-5xl mx-auto px-6 text-center">
+                <div class="inline-block px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold uppercase tracking-wider mb-6">
+                    Regulación y Cumplimiento
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold text-text-main dark:text-white mb-6 tracking-tight">Operamos bajo la supervisión de la Superfinanciera</h2>
+                <p class="text-lg text-text-muted dark:text-slate-400 mb-8 leading-relaxed max-w-3xl mx-auto">
+                    Aluri cumple con todas las regulaciones colombianas para plataformas de financiamiento colaborativo. Estamos comprometidos con la protección de nuestros usuarios y la transparencia en nuestras operaciones.
+                </p>
+                <div class="flex flex-wrap justify-center items-center gap-8 pt-8">
+                    <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                        <span class="material-symbols-outlined text-2xl">verified_user</span>
+                        <span class="font-semibold">Vigilado Superfinanciera</span>
+                    </div>
+                    <div class="h-8 w-[1px] bg-slate-300 dark:bg-slate-700"></div>
+                    <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                        <span class="material-symbols-outlined text-2xl">gavel</span>
+                        <span class="font-semibold">Cumplimiento Legal</span>
+                    </div>
+                    <div class="h-8 w-[1px] bg-slate-300 dark:bg-slate-700"></div>
+                    <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                        <span class="material-symbols-outlined text-2xl">shield_lock</span>
+                        <span class="font-semibold">Datos Protegidos</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="py-20 px-6">
+            <div class="max-w-5xl mx-auto bg-slate-900 rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
+                <div class="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/20 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2"></div>
+                <div class="relative z-10 flex flex-col items-center gap-8">
+                    <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight">
+                        Únete a nuestra comunidad
+                    </h2>
+                    <p class="text-slate-300 text-lg max-w-2xl">
+                        Ya sea que busques liquidez o una inversión inteligente, Aluri es tu aliado financiero.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button class="flex items-center justify-center px-10 h-14 bg-primary hover:bg-primary-dark text-slate-900 text-lg font-bold rounded-full shadow-lg shadow-primary/25 transition-all hover:scale-105">
+                            Empezar Ahora
+                        </button>
+                        <button class="flex items-center justify-center px-10 h-14 bg-white/10 hover:bg-white/20 text-white text-lg font-bold rounded-full border border-white/20 transition-all">
+                            Contáctanos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 py-16 border-t border-slate-800 font-sans">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <div class="space-y-6">
+                    <div class="flex items-center gap-2 text-white">
+                        <div class="size-6 text-primary">
+                            <svg class="w-full h-full" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                                <path clip-rule="evenodd" d="M24 4L42 14V34L24 44L6 34V14L24 4ZM24 9.5L36 16.2V31.8L24 38.5L12 31.8V16.2L24 9.5Z" fill="currentColor" fill-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-bold">Aluri</span>
+                    </div>
+                    <p class="text-sm leading-relaxed text-slate-400">
+                        Somos una plataforma tecnológica que conecta inversionistas con solicitudes de liquidez con garantía hipotecaria. No captamos dinero del público.
+                    </p>
+                    <div class="flex gap-4">
+                        <a class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary hover:text-slate-900 transition-colors" href="#">
+                            <span class="font-bold text-xs">X</span>
+                        </a>
+                        <a class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary hover:text-slate-900 transition-colors" href="#">
+                            <span class="font-bold text-xs">LI</span>
+                        </a>
+                        <a class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary hover:text-slate-900 transition-colors" href="#">
+                            <span class="font-bold text-xs">IG</span>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-6">Productos</h4>
+                    <ul class="space-y-4 text-sm">
+                        <li><a class="hover:text-primary transition-colors" href="#">Crédito de Liquidez</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Inversión Inmobiliaria</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Simulador</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Tasas y Tarifas</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-6">Compañía</h4>
+                    <ul class="space-y-4 text-sm">
+                        <li><a class="hover:text-primary transition-colors" href="nosotros.html">Nosotros</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Blog</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Aliados</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Centro de Ayuda</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-6">Legal</h4>
+                    <ul class="space-y-4 text-sm">
+                        <li><a class="hover:text-primary transition-colors" href="#">Términos y Condiciones</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Política de Privacidad</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Tratamiento de Datos</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Protección al Consumidor</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
+                <p>© 2023 Aluri S.A.S. Todos los derechos reservados. Colombia.</p>
+                <div class="flex items-center gap-2 opacity-60">
+                    <span class="material-symbols-outlined text-base">lock</span>
+                    <span>Transacciones seguras y encriptadas</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
