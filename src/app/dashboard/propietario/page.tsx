@@ -2,7 +2,7 @@ import { createClient } from '../../../utils/supabase/server'
 import { redirect } from 'next/navigation'
 
 export default async function OwnerDashboard() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   // 1. Verificación de Sesión
   const { data: { user } } = await supabase.auth.getUser()

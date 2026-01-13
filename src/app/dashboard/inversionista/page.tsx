@@ -2,7 +2,7 @@ import { createClient } from '../../../utils/supabase/server'
 import { redirect } from 'next/navigation'
 
 export default async function InvestorDashboard() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   // 1. Verificamos sesión (Doble capa de seguridad)
   const { data: { user } } = await supabase.auth.getUser()
