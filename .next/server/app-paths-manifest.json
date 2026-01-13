@@ -1,7 +1,4 @@
 {
   "/not-found": "app/not-found.js",
-  "/login/propietario/page": "app/login/propietario/page.js",
-  "/dashboard/inversionista/page": "app/dashboard/inversionista/page.js",
-  "/login/inversionista/page": "app/login/inversionista/page.js",
-  "/auth/signout/route": "app/auth/signout/route.js"
+  "/login/propietario/page": "app/login/propietario/page.js"
 }
