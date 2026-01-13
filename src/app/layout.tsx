@@ -13,6 +13,10 @@ export const metadata: Metadata = {
   title: "Aluri - Créditos e Inversiones Inmobiliarias",
   description: "Plataforma de financiamiento inmobiliario que conecta propietarios e inversionistas",
   keywords: ["créditos", "inversiones", "inmobiliaria", "propiedades", "financiamiento"],
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export default function RootLayout({
