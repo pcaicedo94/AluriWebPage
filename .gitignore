@@ -19,5 +19,6 @@ Thumbs.db
 
 # Build outputs
 dist/
-build/.next/
+build/
+.next/
 .vercel
