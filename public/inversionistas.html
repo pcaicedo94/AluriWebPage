@@ -151,7 +151,7 @@
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row justify-center gap-4 mt-12">
-                    <button class="px-8 py-4 bg-primary text-slate-900 font-semibold rounded-full hover:bg-emerald-400 transition-all duration-300 shadow-lg shadow-primary/20">
+                    <button onclick="document.getElementById('form-inversionistas').scrollIntoView({behavior: 'smooth'})" class="px-8 py-4 bg-primary text-slate-900 font-semibold rounded-full hover:bg-emerald-400 transition-all duration-300 shadow-lg shadow-primary/20">
                         Ver Oportunidades
                     </button>
                     <button class="px-8 py-4 bg-slate-800 dark:bg-slate-700 text-white font-semibold rounded-full hover:bg-slate-700 dark:hover:bg-slate-600 transition-all duration-300">
@@ -256,7 +256,7 @@
                     <h2 class="text-3xl md:text-4xl font-bold text-text-main dark:text-white mb-4 tracking-tight">Comienza a invertir hoy</h2>
                     <p class="text-text-muted dark:text-slate-400 text-lg">Completa el formulario y un asesor se pondrá en contacto contigo.</p>
                 </div>
-                <form class="bg-background-subtle dark:bg-slate-800/50 rounded-3xl p-8 md:p-12 border border-slate-100 dark:border-slate-700">
+                <form id="form-inversionistas" class="bg-background-subtle dark:bg-slate-800/50 rounded-3xl p-8 md:p-12 border border-slate-100 dark:border-slate-700">
                     <div class="grid md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <label class="block text-sm font-semibold text-text-main dark:text-white mb-2" for="nombre">Nombre Completo *</label>
