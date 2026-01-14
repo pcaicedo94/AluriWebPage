@@ -44,6 +44,30 @@
         select option {
             font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", Inter, sans-serif;
         }
+        
+        /* Testimonials carousel styles */
+        #testimonials-track {
+            transition: transform 0.5s ease-in-out;
+        }
+        
+        .testimonial-dot {
+            background-color: #cbd5e1;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .testimonial-dot.active {
+            background-color: #0f172a;
+            width: 2rem;
+        }
+        
+        .dark .testimonial-dot {
+            background-color: #475569;
+        }
+        
+        .dark .testimonial-dot.active {
+            background-color: #ffffff;
+        }
     </style>
 </head>
 <body class="font-display bg-background-light dark:bg-background-dark text-text-main antialiased selection:bg-primary selection:text-text-main">
@@ -227,54 +251,78 @@
                     </h2>
                 </div>
                 
-                <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                    <!-- Testimonial 1 -->
-                    <div class="bg-background-subtle dark:bg-slate-800/50 p-8 rounded-3xl border border-slate-100 dark:border-slate-700">
-                        <p class="text-text-muted dark:text-slate-300 italic mb-6 leading-relaxed">
-                            "aluri me ayudó a darle un giro a mis planes y remodelar mi casa. Todo fue rápido y sencillo."
-                        </p>
-                        <div class="flex items-center gap-4">
-                            <div class="w-16 h-16 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden">
-                                <img src="https://i.pravatar.cc/150?img=12" alt="Carlos M." class="w-full h-full object-cover">
-                            </div>
-                            <div>
-                                <p class="font-bold text-text-main dark:text-white">Carlos M.</p>
-                                <p class="text-sm text-primary">BOGOTÁ</p>
+                <div class="relative max-w-6xl mx-auto overflow-hidden">
+                    <div id="testimonials-track" class="grid md:grid-cols-3 gap-8">
+                        <!-- Testimonial 1 -->
+                        <div class="testimonial-card bg-background-subtle dark:bg-slate-800/50 p-8 rounded-3xl border border-slate-100 dark:border-slate-700">
+                            <p class="text-text-muted dark:text-slate-300 italic mb-6 leading-relaxed">
+                                "aluri me ayudó a darle un giro a mis planes y remodelar mi casa. Todo fue rápido y sencillo."
+                            </p>
+                            <div class="flex items-center gap-4">
+                                <div class="w-16 h-16 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden">
+                                    <img src="https://i.pravatar.cc/150?img=12" alt="Carlos M." class="w-full h-full object-cover">
+                                </div>
+                                <div>
+                                    <p class="font-bold text-text-main dark:text-white">Carlos M.</p>
+                                    <p class="text-sm text-primary">BOGOTÁ</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Testimonial 2 -->
-                    <div class="bg-background-subtle dark:bg-slate-800/50 p-8 rounded-3xl border border-slate-100 dark:border-slate-700">
-                        <p class="text-text-muted dark:text-slate-300 italic mb-6 leading-relaxed">
-                            "Pensé que no tenía opciones porque mi banco me rechazó, pero aluri me ayudó. ¡Ahora estoy emprendiendo!"
-                        </p>
-                        <div class="flex items-center gap-4">
-                            <div class="w-16 h-16 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden">
-                                <img src="https://i.pravatar.cc/150?img=45" alt="María L." class="w-full h-full object-cover">
-                            </div>
-                            <div>
-                                <p class="font-bold text-text-main dark:text-white">María L.</p>
-                                <p class="text-sm text-primary">CHÍA</p>
+                        <!-- Testimonial 2 -->
+                        <div class="testimonial-card bg-background-subtle dark:bg-slate-800/50 p-8 rounded-3xl border border-slate-100 dark:border-slate-700">
+                            <p class="text-text-muted dark:text-slate-300 italic mb-6 leading-relaxed">
+                                "Pensé que no tenía opciones porque mi banco me rechazó, pero aluri me ayudó. ¡Ahora estoy emprendiendo!"
+                            </p>
+                            <div class="flex items-center gap-4">
+                                <div class="w-16 h-16 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden">
+                                    <img src="https://i.pravatar.cc/150?img=45" alt="María L." class="w-full h-full object-cover">
+                                </div>
+                                <div>
+                                    <p class="font-bold text-text-main dark:text-white">María L.</p>
+                                    <p class="text-sm text-primary">CHÍA</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Testimonial 3 -->
-                    <div class="bg-background-subtle dark:bg-slate-800/50 p-8 rounded-3xl border border-slate-100 dark:border-slate-700">
-                        <p class="text-text-muted dark:text-slate-300 italic mb-6 leading-relaxed">
-                            "No sabía que podía usar mi propiedad sin afectar mi puntaje crediticio. ¡Ahora conseguí el presupuesto que necesitaba!"
-                        </p>
-                        <div class="flex items-center gap-4">
-                            <div class="w-16 h-16 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden">
-                                <img src="https://i.pravatar.cc/150?img=47" alt="Sandra T." class="w-full h-full object-cover">
+                        <!-- Testimonial 3 -->
+                        <div class="testimonial-card bg-background-subtle dark:bg-slate-800/50 p-8 rounded-3xl border border-slate-100 dark:border-slate-700">
+                            <p class="text-text-muted dark:text-slate-300 italic mb-6 leading-relaxed">
+                                "No sabía que podía usar mi propiedad sin afectar mi puntaje crediticio. ¡Ahora conseguí el presupuesto que necesitaba!"
+                            </p>
+                            <div class="flex items-center gap-4">
+                                <div class="w-16 h-16 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden">
+                                    <img src="https://i.pravatar.cc/150?img=47" alt="Sandra T." class="w-full h-full object-cover">
+                                </div>
+                                <div>
+                                    <p class="font-bold text-text-main dark:text-white">Sandra T.</p>
+                                    <p class="text-sm text-primary">SOACHA</p>
+                                </div>
                             </div>
-                            <div>
-                                <p class="font-bold text-text-main dark:text-white">Sandra T.</p>
-                                <p class="text-sm text-primary">SOACHA</p>
+                        </div>
+
+                        <!-- Testimonial 4 -->
+                        <div class="testimonial-card bg-background-subtle dark:bg-slate-800/50 p-8 rounded-3xl border border-slate-100 dark:border-slate-700">
+                            <p class="text-text-muted dark:text-slate-300 italic mb-6 leading-relaxed">
+                                "Gracias a aluri pude pagar las deudas de mi negocio y continuar creciendo. El proceso fue muy transparente."
+                            </p>
+                            <div class="flex items-center gap-4">
+                                <div class="w-16 h-16 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden">
+                                    <img src="https://i.pravatar.cc/150?img=33" alt="Diego R." class="w-full h-full object-cover">
+                                </div>
+                                <div>
+                                    <p class="font-bold text-text-main dark:text-white">Diego R.</p>
+                                    <p class="text-sm text-primary">MEDELLÍN</p>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Carousel dots indicator -->
+                <div class="flex justify-center gap-3 mt-12">
+                    <button class="testimonial-dot active w-3 h-3 rounded-full" data-index="0"></button>
+                    <button class="testimonial-dot w-3 h-3 rounded-full" data-index="1"></button>
                 </div>
             </div>
         </section>
@@ -729,6 +777,33 @@
         
         // Initial calculation
         calculateLoan();
+
+        // Testimonials Carousel - Show 3 at a time
+        let currentSlide = 0;
+        const testimonialTrack = document.getElementById('testimonials-track');
+        const testimonialCards = document.querySelectorAll('.testimonial-card');
+        const testimonialDots = document.querySelectorAll('.testimonial-dot');
+        const totalTestimonials = testimonialCards.length;
+        const totalSlides = 2; // 2 slides: [0,1,2] and [1,2,3]
+
+        function updateCarousel(slideIndex) {
+            // Slide by one card position
+            const translateAmount = slideIndex * -33.33; // -33.33% per card (since showing 3)
+            testimonialTrack.style.transform = `translateX(${translateAmount}%)`;
+            
+            // Update dots
+            testimonialDots.forEach(dot => dot.classList.remove('active'));
+            testimonialDots[slideIndex].classList.add('active');
+            
+            currentSlide = slideIndex;
+        }
+
+        // Dots navigation
+        testimonialDots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                updateCarousel(index);
+            });
+        });
     </script>
 </body>
 </html>
