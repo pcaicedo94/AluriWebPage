@@ -404,7 +404,9 @@
             
             // CTA section
             document.querySelectorAll('.btn-solicitar-estudio').forEach(btn => {
-                btn.addEventListener('click', () => navigateTo('solicitar-estudio'));
+                btn.addEventListener('click', () => {
+                    window.location.href = 'propietarios.html#form-propietarios';
+                });
             });
             
             // Footer links
