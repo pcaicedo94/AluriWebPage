@@ -21,9 +21,12 @@ if ($LASTEXITCODE -eq 0) {
     
     Write-Host "`n=== ALARM! 30 seconds have passed since git push ===" -ForegroundColor Yellow -BackgroundColor Red
     
-    # Play system beep multiple times
+    # Play Windows system beep using rundll32 (more reliable)
     for ($i = 1; $i -le 5; $i++) {
+        # Try Console.Beep first
         [Console]::Beep(800, 500)
+        # Also use Windows Media Player sound
+        (New-Object Media.SoundPlayer "C:\Windows\Media\Windows Notify System Generic.wav").PlaySync()
         Start-Sleep -Milliseconds 200
     }
     
