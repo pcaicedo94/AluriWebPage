@@ -214,169 +214,26 @@
                     <h2 class="text-3xl md:text-4xl font-bold text-text-main dark:text-white mb-4 tracking-tight">Solicita tu crédito hoy</h2>
                     <p class="text-text-muted dark:text-slate-400 text-lg">Completa el formulario y un asesor se pondrá en contacto contigo.</p>
                 </div>
-                <div class="bg-background-subtle dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-700">
-                    <div class="flex justify-end mb-4">
-                        <img src="images/AluriLogo.png" alt="aluri" class="h-6">
-                    </div>
-                    <form id="form-propietarios">
-                                <div class="mb-4">
-                                    <label class="block text-xs font-medium text-primary dark:text-primary mb-1.5" for="propiedad">¿Tienes una propiedad a tu nombre? *</label>
-                                    <select class="w-full px-3 h-10 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-text-main dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" id="propiedad" name="propiedad" required>
-                                        <option value="">¿Tienes una propiedad a tu nombre?</option>
-                                        <option value="unico-propietario">Sí, soy único propietario</option>
-                                        <option value="copropietario">Sí, soy copropietario</option>
-                                        <option value="no">No</option>
-                                        <option value="propietario">Sí, soy propietario</option>
-                                        <option value="no-propietario">No soy propietario</option>
-                                    </select>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-xs font-medium text-primary dark:text-primary mb-1.5" for="ubicacion">¿Donde se encuentra ubicado tu inmueble? *</label>
-                                    <select class="w-full px-3 h-10 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-text-main dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" id="ubicacion" name="ubicacion" required>
-                                        <option value="">¿Donde se encuentra ubicado tu inmueble?</option>
-                                        <option value="bogota">Bogotá</option>
-                                        <option value="cali">Cali</option>
-                                        <option value="medellin">Medellín</option>
-                                        <option value="otro">Otro</option>
-                                        <option value="bucaramanga">Bucaramanga</option>
-                                    </select>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-xs font-medium text-primary dark:text-primary mb-1.5" for="dineroNecesitas">¿Cuánto dinero necesitas? *</label>
-                                    <select class="w-full px-3 h-10 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-text-main dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" id="dineroNecesitas" name="dineroNecesitas" required>
-                                        <option value="">¿Cuánto dinero necesitas?</option>
-                                        <option value="20-40">$20,000,000 - $40,000,000</option>
-                                        <option value="40-60">$40,000,000 - $60,000,000</option>
-                                        <option value="60-80">$60,000,000 - $80,000,000</option>
-                                        <option value="80-100">$80,000,000 - $100,000,000</option>
-                                        <option value="100-150">$100,000,000 - $150,000,000</option>
-                                        <option value="150-200">$150,000,000 - $200,000,000</option>
-                                        <option value="200+">Más de $200,000,000</option>
-                                    </select>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-xs font-medium text-primary dark:text-primary mb-1.5" for="nombre">Nombre *</label>
-                                    <input type="text" class="w-full px-3 h-10 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-text-main dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" id="nombre" name="nombre" placeholder="Tu nombre" required>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-xs font-medium text-primary dark:text-primary mb-1.5" for="email">Correo electrónico *</label>
-                                    <input type="email" class="w-full px-3 h-10 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-text-main dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" id="email" name="email" placeholder="tu@ejemplo.com" required>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-xs font-medium text-primary dark:text-primary mb-1.5" for="telefono">Teléfono *</label>
-                                    <div class="flex space-x-2">
-                                        <select class="px-2 h-10 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-text-main dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-xs" id="codigo-pais" name="codigo-pais" style="min-width: 120px;" required>
-                                            <option value="+57">🇨🇴 +57</option>
-                                            <option value="+1">🇺🇸 +1</option>
-                                            <option value="+52">🇲🇽 +52</option>
-                                            <option value="+54">🇦🇷 +54</option>
-                                            <option value="+55">🇧🇷 +55</option>
-                                            <option value="+56">🇨🇱 +56</option>
-                                            <option value="+51">🇵🇪 +51</option>
-                                            <option value="+593">🇪🇨 +593</option>
-                                            <option value="+58">🇻🇪 +58</option>
-                                            <option value="+507">🇵🇦 +507</option>
-                                            <option value="+506">🇨🇷 +506</option>
-                                            <option value="+591">🇧🇴 +591</option>
-                                            <option value="+595">🇵🇾 +595</option>
-                                            <option value="+598">🇺🇾 +598</option>
-                                            <option value="+34">🇪🇸 +34</option>
-                                            <option value="+44">🇬🇧 +44</option>
-                                            <option value="+33">🇫🇷 +33</option>
-                                            <option value="+49">🇩🇪 +49</option>
-                                            <option value="+39">🇮🇹 +39</option>
-                                            <option value="+351">🇵🇹 +351</option>
-                                            <option value="+31">🇳🇱 +31</option>
-                                            <option value="+32">🇧🇪 +32</option>
-                                            <option value="+41">🇨🇭 +41</option>
-                                            <option value="+43">🇦🇹 +43</option>
-                                            <option value="+46">🇸🇪 +46</option>
-                                            <option value="+47">🇳🇴 +47</option>
-                                            <option value="+45">🇩🇰 +45</option>
-                                            <option value="+358">🇫🇮 +358</option>
-                                            <option value="+353">🇮🇪 +353</option>
-                                            <option value="+48">🇵🇱 +48</option>
-                                            <option value="+420">🇨🇿 +420</option>
-                                            <option value="+36">🇭🇺 +36</option>
-                                            <option value="+40">🇷🇴 +40</option>
-                                            <option value="+359">🇧🇬 +359</option>
-                                            <option value="+30">🇬🇷 +30</option>
-                                            <option value="+7">🇷🇺 +7</option>
-                                            <option value="+380">🇺🇦 +380</option>
-                                            <option value="+90">🇹🇷 +90</option>
-                                            <option value="+86">🇨🇳 +86</option>
-                                            <option value="+81">🇯🇵 +81</option>
-                                            <option value="+82">🇰🇷 +82</option>
-                                            <option value="+91">🇮🇳 +91</option>
-                                            <option value="+92">🇵🇰 +92</option>
-                                            <option value="+880">🇧🇩 +880</option>
-                                            <option value="+84">🇻🇳 +84</option>
-                                            <option value="+66">🇹🇭 +66</option>
-                                            <option value="+63">🇵🇭 +63</option>
-                                            <option value="+60">🇲🇾 +60</option>
-                                            <option value="+65">🇸🇬 +65</option>
-                                            <option value="+62">🇮🇩 +62</option>
-                                            <option value="+61">🇦🇺 +61</option>
-                                            <option value="+64">🇳🇿 +64</option>
-                                            <option value="+27">🇿🇦 +27</option>
-                                            <option value="+234">🇳🇬 +234</option>
-                                            <option value="+254">🇰🇪 +254</option>
-                                            <option value="+20">🇪🇬 +20</option>
-                                            <option value="+212">🇲🇦 +212</option>
-                                            <option value="+213">🇩🇿 +213</option>
-                                            <option value="+216">🇹🇳 +216</option>
-                                            <option value="+218">🇱🇾 +218</option>
-                                            <option value="+249">🇸🇩 +249</option>
-                                            <option value="+251">🇪🇹 +251</option>
-                                            <option value="+256">🇺🇬 +256</option>
-                                            <option value="+255">🇹🇿 +255</option>
-                                            <option value="+260">🇿🇲 +260</option>
-                                            <option value="+263">🇿🇼 +263</option>
-                                            <option value="+267">🇧🇼 +267</option>
-                                            <option value="+264">🇳🇦 +264</option>
-                                            <option value="+266">🇱🇸 +266</option>
-                                            <option value="+268">🇸🇿 +268</option>
-                                            <option value="+95">🇲🇲 +95</option>
-                                            <option value="+855">🇰🇭 +855</option>
-                                            <option value="+856">🇱🇦 +856</option>
-                                            <option value="+976">🇲🇳 +976</option>
-                                            <option value="+977">🇳🇵 +977</option>
-                                            <option value="+94">🇱🇰 +94</option>
-                                            <option value="+960">🇲🇻 +960</option>
-                                            <option value="+98">🇮🇷 +98</option>
-                                            <option value="+964">🇮🇶 +964</option>
-                                            <option value="+962">🇯🇴 +962</option>
-                                            <option value="+961">🇱🇧 +961</option>
-                                            <option value="+963">🇸🇾 +963</option>
-                                            <option value="+966">🇸🇦 +966</option>
-                                            <option value="+971">🇦🇪 +971</option>
-                                            <option value="+968">🇴🇲 +968</option>
-                                            <option value="+965">🇰🇼 +965</option>
-                                            <option value="+973">🇧🇭 +973</option>
-                                            <option value="+974">🇶🇦 +974</option>
-                                            <option value="+967">🇾🇪 +967</option>
-                                            <option value="+972">🇮🇱 +972</option>
-                                        </select>
-                                        <input type="tel" class="flex-1 px-3 h-10 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-text-main dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" id="telefono" name="telefono" placeholder="321 555 1234" required>
-                                    </div>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-xs font-medium text-primary dark:text-primary mb-1.5" for="cedula">Cédula de ciudadanía *</label>
-                                    <input type="text" class="w-full px-3 h-10 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-text-main dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" id="cedula" name="cedula" placeholder="1234567890" required>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="flex items-start">
-                                        <input type="checkbox" class="mt-0.5 h-3.5 w-3.5 text-primary border-slate-300 dark:border-slate-600 rounded focus:ring-primary" id="terminos" name="terminos" required>
-                                        <span class="ml-2 text-xs text-text-muted dark:text-slate-400 leading-tight">
-                                            Acepto los <a href="#" class="text-primary hover:underline">términos y condiciones</a> y autorizo el tratamiento de mis datos personales.
-                                        </span>
-                                    </label>
-                                </div>
-                                <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-black font-semibold text-sm py-2.5 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
-                                    Quiero Solicitar Capital
-                                </button>
-                                <p class="success-message text-center text-primary font-semibold mt-4 hidden">¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto.</p>
-                    </form>
+                <div class="bg-background-subtle dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-700" style="min-height: 746px;">
+                    <iframe
+                        src="https://api.leadconnectorhq.com/widget/form/trMGKpS2tkxOAyeAoiiq"
+                        style="width:100%;height:746px;border:none;border-radius:0px"
+                        id="inline-trMGKpS2tkxOAyeAoiiq" 
+                        data-layout="{'id':'INLINE'}"
+                        data-trigger-type="alwaysShow"
+                        data-trigger-value=""
+                        data-activation-type="alwaysActivated"
+                        data-activation-value=""
+                        data-deactivation-type="neverDeactivate"
+                        data-deactivation-value=""
+                        data-form-name="ALURI"
+                        data-height="746"
+                        data-layout-iframe-id="inline-trMGKpS2tkxOAyeAoiiq"
+                        data-form-id="trMGKpS2tkxOAyeAoiiq"
+                        title="ALURI"
+                    >
+                    </iframe>
+                    <script src="https://link.msgsndr.com/js/form_embed.js"></script>
                 </div>
             </div>
         </section>
