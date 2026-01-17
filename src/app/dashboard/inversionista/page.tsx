@@ -47,7 +47,11 @@ export default async function InvestorDashboard() {
     .eq('investor_id', user.id)
 
   if (error) {
-    console.error('Error:', error)
+    // CAMBIO AQUI: Usamos JSON.stringify para forzar a mostrar el detalle
+    console.error('🔴 ERROR SUPABASE:', JSON.stringify(error, null, 2))
+    console.error('🔍 Detalle:', error.message, error.details, error.hint)
+  } else {
+    console.log('✅ Datos recibidos:', rawData?.length, 'inversiones')
   }
 
   // 3. APLICAMOS EL MOLDE (CASTING)
@@ -72,11 +76,21 @@ export default async function InvestorDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-white p-8">
-      <header className="mb-8 border-b border-slate-800 pb-6">
-        <h1 className="text-3xl font-bold text-emerald-400">Panel de Inversionista</h1>
-        <p className="text-slate-400 mt-1">
-          {new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-        </p>
+      <header className="mb-8 border-b border-slate-800 pb-6 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-emerald-400">Panel de Inversionista</h1>
+          <p className="text-slate-400 mt-1">
+            {new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+        </div>
+        <form action="/auth/signout" method="post">
+          <button
+            type="submit"
+            className="bg-slate-800 border border-slate-700 text-slate-300 px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors"
+          >
+            Cerrar Sesión
+          </button>
+        </form>
       </header>
 
       {/* KPIs */}

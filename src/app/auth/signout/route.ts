@@ -23,17 +23,31 @@ export async function POST(request: NextRequest) {
     }
   )
 
-  // Verificamos si hay sesión y la cerramos
+  // Verificamos si hay sesión y obtenemos el rol antes de cerrar
   const {
     data: { session },
   } = await supabase.auth.getSession()
 
+  let redirectPath = '/login/inversionista' // default
+
   if (session) {
+    // Obtenemos el rol del usuario antes de cerrar sesión
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .single()
+
+    // Determinamos a qué login redirigir según el rol
+    if (profile?.role === 'propietario') {
+      redirectPath = '/login/propietario'
+    }
+
     await supabase.auth.signOut()
   }
 
-  // Redirigir al login después de salir
-  return NextResponse.redirect(new URL('/login/inversionista', request.url), {
+  // Redirigir al login correspondiente después de salir
+  return NextResponse.redirect(new URL(redirectPath, request.url), {
     status: 302,
   })
 }
