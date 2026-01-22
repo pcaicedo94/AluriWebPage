@@ -36,6 +36,7 @@ export default function UnifiedLoginPage() {
               />
             </div>
           </Link>
+          <Link href="/" className="text-sm font-medium text-slate-400 hover:text-primary transition-colors">Volver</Link>
         </div>
       </header>
 
@@ -51,11 +52,11 @@ export default function UnifiedLoginPage() {
             {/* Header */}
             <div className="text-center mb-8">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-4">
-                <span className="material-symbols-outlined text-emerald-400 text-lg">login</span>
-                <span className="font-semibold text-emerald-400">Acceso Plataforma</span>
+                <span className="material-symbols-outlined text-emerald-400 text-lg">trending_up</span>
+                <span className="font-semibold text-emerald-400">Portal Inversionistas</span>
               </div>
-              <h2 className="text-2xl font-bold mb-2">Iniciar Sesión</h2>
-              <p className="text-slate-400 text-sm">Ingresa con tu correo y contraseña</p>
+              <h2 className="text-3xl font-bold mb-2">Bienvenido de nuevo</h2>
+              <p className="text-slate-400 text-sm">Ingresar a tu cuenta</p>
             </div>
             <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSubmit(new FormData(e.currentTarget)); }}>
               <div>
@@ -66,6 +67,7 @@ export default function UnifiedLoginPage() {
                   id="email"
                   autoComplete="email"
                   required
+                  placeholder="inversor@ejemplo.com"
                   className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
@@ -77,6 +79,7 @@ export default function UnifiedLoginPage() {
                   id="password"
                   autoComplete="current-password"
                   required
+                  placeholder="••••••••"
                   className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
@@ -89,6 +92,12 @@ export default function UnifiedLoginPage() {
                 {isPending ? 'Ingresando...' : 'Ingresar'}
               </button>
             </form>
+            <div className="mt-8 text-center text-sm text-slate-400">
+              <div className="mb-2">¿Nuevo inversor?</div>
+              <Link href="/inversionistas" className="text-primary font-semibold hover:underline">Regístrate aquí para comenzar a invertir</Link>
+              <div className="mt-4">¿Buscas un préstamo?</div>
+              <Link href="/propietarios" className="text-primary font-semibold hover:underline">Regístrate para conseguir un préstamo</Link>
+            </div>
           </div>
         </div>
       </main>
