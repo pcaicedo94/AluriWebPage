@@ -28,26 +28,11 @@ export async function POST(request: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
-  let redirectPath = '/login/inversionista' // default
-
+  // Always sign out and redirect to unified login page
   if (session) {
-    // Obtenemos el rol del usuario antes de cerrar sesión
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', session.user.id)
-      .single()
-
-    // Determinamos a qué login redirigir según el rol
-    if (profile?.role === 'propietario') {
-      redirectPath = '/login/propietario'
-    }
-
     await supabase.auth.signOut()
   }
-
-  // Redirigir al login correspondiente después de salir
-  return NextResponse.redirect(new URL(redirectPath, request.url), {
+  return NextResponse.redirect(new URL('/login', request.url), {
     status: 302,
   })
 }
