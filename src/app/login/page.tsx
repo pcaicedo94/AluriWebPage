@@ -27,7 +27,7 @@ export default function UnifiedLoginPage() {
           <Link href="/" className="flex items-center gap-3 group cursor-pointer">
             <div className="h-12 w-auto relative">
               <Image 
-                src="/images/AluriLogo.png" 
+                src="/images/AluriLogoBlackBG.png" 
                 alt="Aluri Logo" 
                 width={120}
                 height={48}
