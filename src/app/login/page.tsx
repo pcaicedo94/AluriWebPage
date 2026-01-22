@@ -51,9 +51,8 @@ export default function UnifiedLoginPage() {
           <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-2xl">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-4">
-                <span className="material-symbols-outlined text-emerald-400 text-lg">trending_up</span>
-                <span className="font-semibold text-emerald-400">Portal Inversionistas</span>
+              <div className="inline-flex items-center px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-4">
+                <span className="font-semibold text-emerald-400">Portal para clientes</span>
               </div>
               <h2 className="text-3xl font-bold mb-2">Bienvenido de nuevo</h2>
               <p className="text-slate-400 text-sm">Ingresar a tu cuenta</p>
