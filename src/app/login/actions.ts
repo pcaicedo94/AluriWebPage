@@ -38,7 +38,9 @@ export async function login(formData: FormData) {
 
   // Success - revalidate and redirect to appropriate dashboard
   revalidatePath('/', 'layout')
-  if (profile.role === 'inversionista') {
+  if (profile.role === 'admin') {
+    redirect('/dashboard/admin/usuarios')
+  } else if (profile.role === 'inversionista') {
     redirect('/dashboard/inversionista')
   } else if (profile.role === 'propietario') {
     redirect('/dashboard/propietario')

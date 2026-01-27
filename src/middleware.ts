@@ -9,10 +9,10 @@ export async function middleware(request: NextRequest) {
   // ADMIN ROUTE PROTECTION
   // ============================================
   if (pathname.startsWith('/dashboard/admin')) {
-    // No user logged in -> redirect to admin login
+    // No user logged in -> redirect to login
     if (!user) {
       const url = request.nextUrl.clone()
-      url.pathname = '/login/admin'
+      url.pathname = '/login'
       return NextResponse.redirect(url)
     }
 
