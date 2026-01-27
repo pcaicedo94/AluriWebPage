@@ -1,33 +1,65 @@
 import { createClient } from '../../../utils/supabase/server'
-import { redirect } from 'next/navigation'
-import { TrendingUp, Briefcase, Percent } from 'lucide-react'
+import { Briefcase } from 'lucide-react'
 import PortfolioChart from '../../../components/dashboard/PortfolioChart'
 
-// 1. DEFINIMOS EL MOLDE DE LOS DATOS (Para calmar a TypeScript)
+// Strictly typed interface with updated loan schema
+interface Loan {
+  code: string
+  status: string
+  interest_rate: number
+  total_amount: number
+  start_date: string
+  term_months: number
+  amortization_type: string | null
+  next_payment_date: string | null
+  next_payment_amount: number | null
+  amount_overdue: number | null
+}
+
 interface Investment {
   id: string
   amount_invested: number
   roi_percentage: number
   created_at: string
   loan_id: string
-  loans: {
-    code: string
-    status: string
-    interest_rate: number
-    total_amount: number
-    start_date: string
-  } | null
+  loans: Loan | null
+}
+
+// Helper: Format currency as COP
+function formatCOP(value: number): string {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value)
+}
+
+// Helper: Format date as dd/MM/yyyy
+function formatDate(dateString: string | null): string {
+  if (!dateString) return 'N/A'
+  const date = new Date(dateString)
+  const day = date.getDate().toString().padStart(2, '0')
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const year = date.getFullYear()
+  return `${day}/${month}/${year}`
+}
+
+// Helper: Calculate maturity date (start_date + term_months)
+function calculateMaturityDate(startDate: string | null, termMonths: number | null): string {
+  if (!startDate || !termMonths) return 'N/A'
+  const date = new Date(startDate)
+  date.setMonth(date.getMonth() + termMonths)
+  return formatDate(date.toISOString())
 }
 
 export default async function InvestorDashboard() {
   const supabase = await createClient()
 
+  // User is already verified in layout.tsx
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return redirect('/login/inversionista')
-  }
 
-  // 2. HACEMOS LA CONSULTA
+  // Fetch investments with updated loan columns
   const { data: rawData, error } = await supabase
     .from('investments')
     .select(`
@@ -41,153 +73,216 @@ export default async function InvestorDashboard() {
         status,
         interest_rate,
         total_amount,
-        start_date
+        start_date,
+        term_months,
+        amortization_type,
+        next_payment_date,
+        next_payment_amount,
+        amount_overdue
       )
     `)
-    .eq('investor_id', user.id)
+    .eq('investor_id', user?.id)
 
   if (error) {
-    // CAMBIO AQUI: Usamos JSON.stringify para forzar a mostrar el detalle
-    console.error('🔴 ERROR SUPABASE:', JSON.stringify(error, null, 2))
-    console.error('🔍 Detalle:', error.message, error.details, error.hint)
-  } else {
-    console.log('✅ Datos recibidos:', rawData?.length, 'inversiones')
+    console.error('Error fetching investments:', JSON.stringify(error, null, 2))
   }
 
-  // 3. APLICAMOS EL MOLDE (CASTING)
-  // Le decimos a TS: "Confía en mí, los datos tienen esta forma"
   const investments = (rawData || []) as unknown as Investment[]
 
-  // 4. CALCULOS (Ahora TS sabe que las propiedades existen)
-  const totalInvested = investments.reduce((sum, item) => sum + Number(item.amount_invested), 0)
-  
-  // Verificamos que 'loans' exista antes de leer el status
-  const activeProjects = investments.filter(i => i.loans?.status === 'active').length
-  
-  const weightedRoi = totalInvested > 0 
-    ? investments.reduce((acc, item) => acc + (Number(item.amount_invested) * Number(item.roi_percentage)), 0) / totalInvested
+  // KPI Calculations
+  const cantidadInversiones = investments.length
+  const montoInvertidoTotal = investments.reduce((sum, inv) => sum + Number(inv.amount_invested), 0)
+
+  const rentabilidadPromedio = montoInvertidoTotal > 0
+    ? investments.reduce((acc, inv) => acc + (Number(inv.amount_invested) * Number(inv.roi_percentage)), 0) / montoInvertidoTotal
     : 0
 
-  const totalExpectedReturn = investments.reduce((acc, item) => {
-    return acc + (Number(item.amount_invested) * (1 + Number(item.roi_percentage) / 100))
+  // Simulated collected (20% of expected returns for now)
+  const recaudadoTotal = investments.reduce((acc, inv) => {
+    const invested = Number(inv.amount_invested)
+    const roi = Number(inv.roi_percentage) / 100
+    return acc + (invested * roi * 0.20)
   }, 0)
-  
-  const simulatedCollected = totalExpectedReturn * 0.15 
+
+  // Capital vigente = Total invertido - Recaudado
+  const capitalVigente = montoInvertidoTotal - recaudadoTotal
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-8">
-      <header className="mb-8 border-b border-slate-800 pb-6 flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold text-emerald-400">Panel de Inversionista</h1>
-          <p className="text-slate-400 mt-1">
-            {new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-          </p>
-        </div>
-        <form action="/auth/signout" method="post">
-          <button
-            type="submit"
-            className="bg-slate-800 border border-slate-700 text-slate-300 px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors"
-          >
-            Cerrar Sesión
-          </button>
-        </form>
+    <div className="text-white p-8">
+      <header className="mb-8 border-b border-slate-800 pb-6">
+        <h1 className="text-3xl font-bold text-primary">Estado de Cuenta</h1>
+        <p className="text-slate-400 mt-1">
+          {new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+        </p>
       </header>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      {/* Top Section: KPIs + Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* KPI Summary Card */}
         <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 bg-emerald-500/10 rounded-full text-emerald-400">
-              <TrendingUp size={24} />
+          <h2 className="text-xl font-semibold mb-6 text-primary">Resumen de Inversiones</h2>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center py-3 border-b border-slate-700">
+              <span className="text-slate-400">Cantidad de Inversiones</span>
+              <span className="text-2xl font-bold text-white">{cantidadInversiones}</span>
             </div>
-            <span className="text-slate-400 text-sm">Total Invertido</span>
+            <div className="flex justify-between items-center py-3 border-b border-slate-700">
+              <span className="text-slate-400">Monto Invertido Total</span>
+              <span className="text-2xl font-bold text-white">{formatCOP(montoInvertidoTotal)}</span>
+            </div>
+            <div className="flex justify-between items-center py-3 border-b border-slate-700">
+              <span className="text-slate-400">Rentabilidad Promedio</span>
+              <span className="text-2xl font-bold text-primary">{rentabilidadPromedio.toFixed(2)}% E.A.</span>
+            </div>
+            <div className="flex justify-between items-center py-3 border-b border-slate-700">
+              <span className="text-slate-400">Capital Invertido Vigente</span>
+              <span className="text-2xl font-bold text-white">{formatCOP(capitalVigente)}</span>
+            </div>
+            <div className="flex justify-between items-center py-3">
+              <span className="text-slate-400">Recaudado Total</span>
+              <span className="text-2xl font-bold text-emerald-400">{formatCOP(recaudadoTotal)}</span>
+            </div>
           </div>
-          <p className="text-3xl font-bold text-white">
-            ${totalInvested.toLocaleString('es-CO')}
-          </p>
         </div>
 
+        {/* Portfolio Chart */}
         <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 bg-blue-500/10 rounded-full text-blue-400">
-              <Briefcase size={24} />
-            </div>
-            <span className="text-slate-400 text-sm">Proyectos Activos</span>
+          <h2 className="text-xl font-semibold mb-6">Composicion del Portafolio</h2>
+          <div className="h-72">
+            <PortfolioChart invested={montoInvertidoTotal} collected={recaudadoTotal} />
           </div>
-          <p className="text-3xl font-bold text-white">{activeProjects}</p>
-        </div>
-
-        <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 bg-purple-500/10 rounded-full text-purple-400">
-              <Percent size={24} />
-            </div>
-            <span className="text-slate-400 text-sm">ROI Promedio</span>
-          </div>
-          <p className="text-3xl font-bold text-white">{weightedRoi.toFixed(2)}%</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 lg:col-span-1">
-          <h2 className="text-xl font-semibold mb-6">Composición</h2>
-          <div className="h-64">
-             <PortfolioChart invested={totalInvested} collected={simulatedCollected} />
-          </div>
-        </div>
+      {/* Bottom Section: Detailed Table */}
+      <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+        <h2 className="text-xl font-semibold mb-6">Detalle de Inversiones</h2>
 
-        <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 lg:col-span-2">
-          <h2 className="text-xl font-semibold mb-6">Inversiones Activas</h2>
-          
-          {investments.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="text-slate-400 text-sm border-b border-slate-700">
-                    <th className="pb-4 font-medium">Crédito</th>
-                    <th className="pb-4 font-medium">Participación</th>
-                    <th className="pb-4 font-medium">Monto</th>
-                    <th className="pb-4 font-medium">Tasa (ROI)</th>
-                    <th className="pb-4 font-medium">Estado</th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm">
-                  {investments.map((inv) => {
-                     const loanTotal = inv.loans?.total_amount || 1;
-                     const participation = (Number(inv.amount_invested) / Number(loanTotal)) * 100;
-                     
-                     return (
-                      <tr key={inv.id} className="border-b border-slate-700/50 hover:bg-slate-700/30">
-                        <td className="py-4 font-mono text-emerald-400 font-bold">
-                          {inv.loans?.code || 'N/A'}
-                        </td>
-                        <td className="py-4 text-slate-300">
-                          {participation.toFixed(1)}%
-                        </td>
-                        <td className="py-4 font-medium text-white">
-                          ${Number(inv.amount_invested).toLocaleString('es-CO')}
-                        </td>
-                        <td className="py-4 text-emerald-400">
-                          {inv.roi_percentage}% E.A.
-                        </td>
-                        <td className="py-4">
-                          <span className="px-2 py-1 rounded-full text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 capitalize">
-                            {inv.loans?.status || 'Active'}
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-64 text-slate-400">
-              <Briefcase size={48} className="mb-4 opacity-50" />
-              <p>No se encontraron inversiones.</p>
-            </div>
-          )}
-        </div>
+        {investments.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[1400px]">
+              <thead>
+                <tr className="text-slate-400 text-xs border-b border-slate-700 uppercase tracking-wider">
+                  <th className="pb-4 px-2 font-medium">Credito</th>
+                  <th className="pb-4 px-2 font-medium">Participacion %</th>
+                  <th className="pb-4 px-2 font-medium">Monto Invertido</th>
+                  <th className="pb-4 px-2 font-medium">Fecha Originacion</th>
+                  <th className="pb-4 px-2 font-medium">Tipo Credito</th>
+                  <th className="pb-4 px-2 font-medium">Rentabilidad</th>
+                  <th className="pb-4 px-2 font-medium">Recaudado</th>
+                  <th className="pb-4 px-2 font-medium">En Mora?</th>
+                  <th className="pb-4 px-2 font-medium">Para estar al dia</th>
+                  <th className="pb-4 px-2 font-medium">Cancelacion Total</th>
+                  <th className="pb-4 px-2 font-medium">Fecha Prox. Cuota</th>
+                  <th className="pb-4 px-2 font-medium">Proxima Cuota</th>
+                  <th className="pb-4 px-2 font-medium">Fecha Vencimiento</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                {investments.map((inv) => {
+                  const loan = inv.loans
+                  const loanTotal = loan?.total_amount || 1
+                  const participation = (Number(inv.amount_invested) / Number(loanTotal)) * 100
+                  const amountOverdue = Number(loan?.amount_overdue || 0)
+                  const isOverdue = amountOverdue > 0
+
+                  // Simulated collected for this investment (20% of expected return)
+                  const investedAmount = Number(inv.amount_invested)
+                  const roi = Number(inv.roi_percentage) / 100
+                  const collectedForInv = investedAmount * roi * 0.20
+
+                  // Current loan balance (simplified: invested - collected)
+                  const currentBalance = investedAmount - collectedForInv
+
+                  return (
+                    <tr
+                      key={inv.id}
+                      className="border-b border-slate-700/50 hover:bg-slate-700/30"
+                    >
+                      {/* Credito */}
+                      <td className="py-4 px-2 font-mono text-primary font-bold">
+                        {loan?.code || 'N/A'}
+                      </td>
+
+                      {/* Participacion % */}
+                      <td className="py-4 px-2 text-slate-300">
+                        {participation.toFixed(2)}%
+                      </td>
+
+                      {/* Monto Invertido Inicial */}
+                      <td className="py-4 px-2 font-medium text-white">
+                        {formatCOP(investedAmount)}
+                      </td>
+
+                      {/* Fecha Originacion */}
+                      <td className="py-4 px-2 text-slate-300">
+                        {formatDate(loan?.start_date || null)}
+                      </td>
+
+                      {/* Tipo Credito */}
+                      <td className="py-4 px-2 text-slate-300 capitalize">
+                        {loan?.amortization_type || 'N/A'}
+                      </td>
+
+                      {/* Rentabilidad Esperada */}
+                      <td className="py-4 px-2 text-primary font-medium">
+                        {inv.roi_percentage}% E.A.
+                      </td>
+
+                      {/* Recaudado */}
+                      <td className="py-4 px-2 text-emerald-400">
+                        {formatCOP(collectedForInv)}
+                      </td>
+
+                      {/* En Mora? */}
+                      <td className="py-4 px-2">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            isOverdue
+                              ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                              : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          }`}
+                        >
+                          {isOverdue ? 'Si' : 'No'}
+                        </span>
+                      </td>
+
+                      {/* Necesario para estar al dia */}
+                      <td className={`py-4 px-2 ${isOverdue ? 'text-red-400 font-medium' : 'text-slate-300'}`}>
+                        {isOverdue ? formatCOP(amountOverdue) : '-'}
+                      </td>
+
+                      {/* Cancelacion total (Current Balance) */}
+                      <td className="py-4 px-2 text-white font-medium">
+                        {formatCOP(currentBalance)}
+                      </td>
+
+                      {/* Fecha proxima cuota */}
+                      <td className="py-4 px-2 text-slate-300">
+                        {formatDate(loan?.next_payment_date || null)}
+                      </td>
+
+                      {/* Proxima cuota */}
+                      <td className="py-4 px-2 text-white">
+                        {loan?.next_payment_amount ? formatCOP(Number(loan.next_payment_amount)) : 'N/A'}
+                      </td>
+
+                      {/* Fecha vencimiento (start_date + term_months) */}
+                      <td className="py-4 px-2 text-slate-300">
+                        {calculateMaturityDate(loan?.start_date || null, loan?.term_months || null)}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-64 text-slate-400">
+            <Briefcase size={48} className="mb-4 opacity-50" />
+            <p>No se encontraron inversiones.</p>
+          </div>
+        )}
       </div>
     </div>
   )
