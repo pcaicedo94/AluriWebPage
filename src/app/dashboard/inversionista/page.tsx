@@ -63,94 +63,101 @@ export default async function InvestorDashboard() {
 
   return (
     <div className="text-white p-8">
-      <header className="mb-8 border-b border-slate-800 pb-6">
-        <h1 className="text-3xl font-bold text-primary">Panel de Inversionista</h1>
-        <p className="text-slate-400 mt-1">
-          {new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold text-white">Bienvenido, Usuario</h1>
+        <p className="text-zinc-500 mt-1">
+          Resumen de tus inversiones y rendimiento actual.
         </p>
       </header>
 
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 bg-emerald-500/10 rounded-full text-emerald-400">
-              <TrendingUp size={24} />
+        <div className="bg-zinc-900/50 p-6 rounded-xl border border-zinc-800">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-zinc-500 text-sm">Balance Total</span>
+            <div className="p-2 bg-primary/10 rounded-lg text-primary">
+              <TrendingUp size={20} />
             </div>
-            <span className="text-slate-400 text-sm">Total Invertido</span>
           </div>
           <p className="text-3xl font-bold text-white">
-            ${totalInvested.toLocaleString('es-CO')}
+            ${totalInvested.toLocaleString('es-CO', { minimumFractionDigits: 2 })}
           </p>
         </div>
 
-        <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 bg-blue-500/10 rounded-full text-blue-400">
-              <Briefcase size={24} />
+        <div className="bg-zinc-900/50 p-6 rounded-xl border border-zinc-800">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-zinc-500 text-sm">Retorno Anual</span>
+            <div className="p-2 bg-primary/10 rounded-lg text-primary">
+              <Percent size={20} />
             </div>
-            <span className="text-slate-400 text-sm">Proyectos Activos</span>
           </div>
-          <p className="text-3xl font-bold text-white">{activeProjects}</p>
+          <p className="text-3xl font-bold text-white">{weightedRoi.toFixed(1)}%</p>
+          <p className="text-zinc-500 text-sm mt-1">Promedio ponderado</p>
         </div>
 
-        <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 bg-purple-500/10 rounded-full text-purple-400">
-              <Percent size={24} />
+        <div className="bg-zinc-900/50 p-6 rounded-xl border border-zinc-800">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-zinc-500 text-sm">Inversiones Activas</span>
+            <div className="p-2 bg-primary/10 rounded-lg text-primary">
+              <Briefcase size={20} />
             </div>
-            <span className="text-slate-400 text-sm">ROI Promedio</span>
           </div>
-          <p className="text-3xl font-bold text-white">{weightedRoi.toFixed(2)}%</p>
+          <p className="text-3xl font-bold text-white">{activeProjects}</p>
+          <p className="text-zinc-500 text-sm mt-1">Proyectos financiados</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 lg:col-span-1">
-          <h2 className="text-xl font-semibold mb-6">Composicion</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="bg-zinc-900/50 p-6 rounded-xl border border-zinc-800 lg:col-span-1">
+          <h2 className="text-lg font-semibold mb-6 text-white">Distribucion</h2>
           <div className="h-64">
             <PortfolioChart invested={totalInvested} collected={simulatedCollected} />
           </div>
         </div>
+      </div>
 
-        <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 lg:col-span-2">
-          <h2 className="text-xl font-semibold mb-6">Inversiones Activas</h2>
+      <div className="bg-zinc-900/50 p-6 rounded-xl border border-zinc-800">
+        <h2 className="text-lg font-semibold mb-6 text-white">Active Investments</h2>
 
           {investments.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="text-slate-400 text-sm border-b border-slate-700">
-                    <th className="pb-4 font-medium">Credito</th>
-                    <th className="pb-4 font-medium">Participacion</th>
-                    <th className="pb-4 font-medium">Monto</th>
-                    <th className="pb-4 font-medium">Tasa (ROI)</th>
-                    <th className="pb-4 font-medium">Estado</th>
+                  <tr className="text-zinc-500 text-sm border-b border-zinc-800">
+                    <th className="pb-4 font-medium">ID</th>
+                    <th className="pb-4 font-medium">INMUEBLE</th>
+                    <th className="pb-4 font-medium">MONTO</th>
+                    <th className="pb-4 font-medium">ESTADO</th>
+                    <th className="pb-4 font-medium">PROX PAGO</th>
                   </tr>
                 </thead>
                 <tbody className="text-sm">
                   {investments.map((inv) => {
-                    const loanTotal = inv.loans?.total_amount || 1
-                    const participation = (Number(inv.amount_invested) / Number(loanTotal)) * 100
+                    const isEnMora = inv.loans?.status === 'mora' || inv.loans?.status === 'late' || inv.loans?.status === 'default'
+                    const statusText = isEnMora ? 'Mora' : 'Al día'
 
                     return (
-                      <tr key={inv.id} className="border-b border-slate-700/50 hover:bg-slate-700/30">
-                        <td className="py-4 font-mono text-primary font-bold">
-                          {inv.loans?.code || 'N/A'}
-                        </td>
-                        <td className="py-4 text-slate-300">
-                          {participation.toFixed(1)}%
+                      <tr key={inv.id} className="border-b border-zinc-800/50 hover:bg-zinc-800/30">
+                        <td className="py-4 text-zinc-400">
+                          #{inv.loans?.code || 'N/A'}
                         </td>
                         <td className="py-4 font-medium text-white">
-                          ${Number(inv.amount_invested).toLocaleString('es-CO')}
+                          {inv.loans?.code || 'N/A'}
                         </td>
-                        <td className="py-4 text-primary">
-                          {inv.roi_percentage}% E.A.
+                        <td className="py-4 text-white">
+                          ${Number(inv.amount_invested).toLocaleString('es-CO', { minimumFractionDigits: 3 })}
                         </td>
                         <td className="py-4">
-                          <span className="px-2 py-1 rounded-full text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 capitalize">
-                            {inv.loans?.status || 'Active'}
+                          <span className={`px-3 py-1 rounded text-xs font-medium ${
+                            isEnMora
+                              ? 'bg-amber-500/20 text-amber-400'
+                              : 'bg-primary/20 text-primary'
+                          }`}>
+                            {statusText}
                           </span>
+                        </td>
+                        <td className="py-4 text-zinc-400">
+                          {inv.loans?.start_date ? new Date(inv.loans.start_date).toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
                         </td>
                       </tr>
                     )
@@ -159,12 +166,11 @@ export default async function InvestorDashboard() {
               </table>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-64 text-slate-400">
+            <div className="flex flex-col items-center justify-center h-64 text-zinc-500">
               <Briefcase size={48} className="mb-4 opacity-50" />
               <p>No se encontraron inversiones.</p>
             </div>
           )}
-        </div>
       </div>
     </div>
   )

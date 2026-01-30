@@ -26,7 +26,7 @@ export default async function InversionistaLayout({
   const userEmail = user.email || ''
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-black">
       {/* Desktop sidebar */}
       <Sidebar user={{ name: userName, email: userEmail }} />
 
