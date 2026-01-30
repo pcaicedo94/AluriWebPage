@@ -20,6 +20,7 @@ interface Loan {
 interface Investment {
   id: string
   amount_invested: number
+  amount_collected: number | null
   roi_percentage: number
   created_at: string
   loan_id: string
@@ -48,6 +49,7 @@ export default async function MisInversionesPage() {
     .select(`
       id,
       amount_invested,
+      amount_collected,
       roi_percentage,
       created_at,
       loan_id,
@@ -80,11 +82,9 @@ export default async function MisInversionesPage() {
     ? investments.reduce((acc, inv) => acc + (Number(inv.amount_invested) * Number(inv.roi_percentage)), 0) / montoInvertidoTotal
     : 0
 
-  // Simulated collected (20% of expected returns for now)
+  // Total collected from actual database values
   const recaudadoTotal = investments.reduce((acc, inv) => {
-    const invested = Number(inv.amount_invested)
-    const roi = Number(inv.roi_percentage) / 100
-    return acc + (invested * roi * 0.20)
+    return acc + Number(inv.amount_collected || 0)
   }, 0)
 
   // Capital vigente = Total invertido - Recaudado
@@ -148,11 +148,11 @@ export default async function MisInversionesPage() {
               const amountOverdue = Number(loan?.amount_overdue || 0)
               const isOverdue = amountOverdue > 0
 
-              // Simulated collected for this investment (20% of expected return)
+              // Actual collected amount from database
               const investedAmount = Number(inv.amount_invested)
               const roi = Number(inv.roi_percentage) / 100
               const expectedReturn = investedAmount * roi
-              const collectedForInv = expectedReturn * 0.20
+              const collectedForInv = Number(inv.amount_collected || 0)
 
               // Progress percentage (collected / expected return)
               const progressPercent = expectedReturn > 0

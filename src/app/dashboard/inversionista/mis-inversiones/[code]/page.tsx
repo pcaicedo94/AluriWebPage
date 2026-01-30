@@ -29,6 +29,7 @@ interface Loan {
 interface Investment {
   id: string
   amount_invested: number
+  amount_collected: number | null
   roi_percentage: number
   created_at: string
   loan_id: string
@@ -72,6 +73,7 @@ export default async function InvestmentDetailPage({
     .select(`
       id,
       amount_invested,
+      amount_collected,
       roi_percentage,
       created_at,
       loan_id,
@@ -113,7 +115,7 @@ export default async function InvestmentDetailPage({
   const investedAmount = Number(investment.amount_invested)
   const roi = Number(investment.roi_percentage)
   const expectedReturn = investedAmount * (roi / 100)
-  const collectedAmount = expectedReturn * 0.20 // Simulated 20%
+  const collectedAmount = Number(investment.amount_collected || 0)
 
   // Simulated payment history
   const paymentHistory = [
