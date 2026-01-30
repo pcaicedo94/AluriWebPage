@@ -1,5 +1,6 @@
 import { createClient } from '../../../../utils/supabase/server'
 import { Briefcase } from 'lucide-react'
+import Link from 'next/link'
 import PortfolioChart from '../../../../components/dashboard/PortfolioChart'
 
 // Strictly typed interface with updated loan schema
@@ -33,24 +34,6 @@ function formatCOP(value: number): string {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value)
-}
-
-// Helper: Format date as dd/MM/yyyy
-function formatDate(dateString: string | null): string {
-  if (!dateString) return 'N/A'
-  const date = new Date(dateString)
-  const day = date.getDate().toString().padStart(2, '0')
-  const month = (date.getMonth() + 1).toString().padStart(2, '0')
-  const year = date.getFullYear()
-  return `${day}/${month}/${year}`
-}
-
-// Helper: Calculate maturity date (start_date + term_months)
-function calculateMaturityDate(startDate: string | null, termMonths: number | null): string {
-  if (!startDate || !termMonths) return 'N/A'
-  const date = new Date(startDate)
-  date.setMonth(date.getMonth() + termMonths)
-  return formatDate(date.toISOString())
 }
 
 export default async function MisInversionesPage() {
@@ -154,131 +137,77 @@ export default async function MisInversionesPage() {
         </div>
       </div>
 
-      {/* Bottom Section: Detailed Table */}
-      <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700">
+      {/* Bottom Section: Investment Cards */}
+      <div>
         <h2 className="text-xl font-semibold mb-6 text-white">Detalle de Inversiones</h2>
 
         {investments.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[1400px]">
-              <thead>
-                <tr className="text-zinc-500 text-xs border-b border-zinc-700 uppercase tracking-wider">
-                  <th className="pb-4 px-2 font-medium">Credito</th>
-                  <th className="pb-4 px-2 font-medium">Participacion %</th>
-                  <th className="pb-4 px-2 font-medium">Monto Invertido</th>
-                  <th className="pb-4 px-2 font-medium">Fecha Originacion</th>
-                  <th className="pb-4 px-2 font-medium">Tipo Credito</th>
-                  <th className="pb-4 px-2 font-medium">Rentabilidad</th>
-                  <th className="pb-4 px-2 font-medium">Recaudado</th>
-                  <th className="pb-4 px-2 font-medium">Estado</th>
-                  <th className="pb-4 px-2 font-medium">Para estar al dia</th>
-                  <th className="pb-4 px-2 font-medium">Cancelacion Total</th>
-                  <th className="pb-4 px-2 font-medium">Fecha Prox. Cuota</th>
-                  <th className="pb-4 px-2 font-medium">Proxima Cuota</th>
-                  <th className="pb-4 px-2 font-medium">Fecha Vencimiento</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
-                {investments.map((inv) => {
-                  const loan = inv.loans
-                  const loanTotal = loan?.total_amount || 1
-                  const participation = (Number(inv.amount_invested) / Number(loanTotal)) * 100
-                  const amountOverdue = Number(loan?.amount_overdue || 0)
-                  const isOverdue = amountOverdue > 0
+          <div className="space-y-4">
+            {investments.map((inv) => {
+              const loan = inv.loans
+              const amountOverdue = Number(loan?.amount_overdue || 0)
+              const isOverdue = amountOverdue > 0
 
-                  // Simulated collected for this investment (20% of expected return)
-                  const investedAmount = Number(inv.amount_invested)
-                  const roi = Number(inv.roi_percentage) / 100
-                  const collectedForInv = investedAmount * roi * 0.20
+              // Simulated collected for this investment (20% of expected return)
+              const investedAmount = Number(inv.amount_invested)
+              const roi = Number(inv.roi_percentage) / 100
+              const expectedReturn = investedAmount * roi
+              const collectedForInv = expectedReturn * 0.20
 
-                  // Current loan balance (simplified: invested - collected)
-                  const currentBalance = investedAmount - collectedForInv
+              // Progress percentage (collected / expected return)
+              const progressPercent = expectedReturn > 0
+                ? Math.min((collectedForInv / expectedReturn) * 100, 100)
+                : 0
 
-                  return (
-                    <tr
-                      key={inv.id}
-                      className="border-b border-zinc-700/50 hover:bg-zinc-800/30"
+              return (
+                <Link
+                  key={inv.id}
+                  href={`/dashboard/inversionista/mis-inversiones/${loan?.code || inv.id}`}
+                  className="block bg-zinc-900 p-6 rounded-xl border border-zinc-700 hover:border-zinc-600 hover:bg-zinc-900/80 transition-all cursor-pointer"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white">
+                        Credito #{loan?.code || 'N/A'}
+                      </h3>
+                      <p className="text-zinc-400 text-sm mt-1">
+                        Tu inversion: <span className="text-white font-medium">{formatCOP(investedAmount)}</span>
+                      </p>
+                      <p className={`text-sm mt-1 ${isOverdue ? 'text-orange-400' : 'text-primary'}`}>
+                        Recibido a la fecha: <span className="font-medium">{formatCOP(collectedForInv)}</span>
+                      </p>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded text-xs font-medium ${
+                        isOverdue
+                          ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+                          : 'bg-primary/20 text-primary border border-primary/30'
+                      }`}
                     >
-                      {/* Credito */}
-                      <td className="py-4 px-2 font-mono text-primary font-bold">
-                        {loan?.code || 'N/A'}
-                      </td>
+                      {isOverdue ? 'En mora' : 'Al día'}
+                    </span>
+                  </div>
 
-                      {/* Participacion % */}
-                      <td className="py-4 px-2 text-zinc-400">
-                        {participation.toFixed(2)}%
-                      </td>
-
-                      {/* Monto Invertido Inicial */}
-                      <td className="py-4 px-2 font-medium text-white">
-                        {formatCOP(investedAmount)}
-                      </td>
-
-                      {/* Fecha Originacion */}
-                      <td className="py-4 px-2 text-zinc-400">
-                        {formatDate(loan?.start_date || null)}
-                      </td>
-
-                      {/* Tipo Credito */}
-                      <td className="py-4 px-2 text-zinc-400 capitalize">
-                        {loan?.amortization_type || 'N/A'}
-                      </td>
-
-                      {/* Rentabilidad Esperada */}
-                      <td className="py-4 px-2 text-primary font-medium">
-                        {inv.roi_percentage}% E.A.
-                      </td>
-
-                      {/* Recaudado */}
-                      <td className="py-4 px-2 text-emerald-400">
-                        {formatCOP(collectedForInv)}
-                      </td>
-
-                      {/* Estado */}
-                      <td className="py-4 px-2">
-                        <span
-                          className={`px-3 py-1 rounded text-xs font-medium ${
-                            isOverdue
-                              ? 'bg-red-500/20 text-red-400'
-                              : 'bg-emerald-500/20 text-emerald-400'
-                          }`}
-                        >
-                          {isOverdue ? 'En mora' : 'Al día'}
-                        </span>
-                      </td>
-
-                      {/* Necesario para estar al dia */}
-                      <td className={`py-4 px-2 ${isOverdue ? 'text-red-400 font-medium' : 'text-zinc-400'}`}>
-                        {isOverdue ? formatCOP(amountOverdue) : '-'}
-                      </td>
-
-                      {/* Cancelacion total (Current Balance) */}
-                      <td className="py-4 px-2 text-white font-medium">
-                        {formatCOP(currentBalance)}
-                      </td>
-
-                      {/* Fecha proxima cuota */}
-                      <td className="py-4 px-2 text-zinc-400">
-                        {formatDate(loan?.next_payment_date || null)}
-                      </td>
-
-                      {/* Proxima cuota */}
-                      <td className="py-4 px-2 text-white">
-                        {loan?.next_payment_amount ? formatCOP(Number(loan.next_payment_amount)) : 'N/A'}
-                      </td>
-
-                      {/* Fecha vencimiento (start_date + term_months) */}
-                      <td className="py-4 px-2 text-zinc-400">
-                        {calculateMaturityDate(loan?.start_date || null, loan?.term_months || null)}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+                  {/* Progress Bar */}
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          isOverdue ? 'bg-orange-500' : 'bg-primary'
+                        }`}
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
+                    <span className="text-zinc-400 text-sm min-w-[45px] text-right">
+                      {progressPercent.toFixed(0)}%
+                    </span>
+                  </div>
+                </Link>
+              )
+            })}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-64 text-zinc-500">
+          <div className="flex flex-col items-center justify-center h-64 text-zinc-500 bg-zinc-900 rounded-xl border border-zinc-700">
             <Briefcase size={48} className="mb-4 opacity-50" />
             <p>No se encontraron inversiones.</p>
           </div>
