@@ -3,16 +3,16 @@ import { Wallet } from 'lucide-react'
 export default function BilleteraPage() {
   return (
     <div className="text-white p-8">
-      <header className="mb-8 border-b border-slate-800 pb-6">
-        <h1 className="text-3xl font-bold text-primary">Billetera</h1>
-        <p className="text-slate-400 mt-1">
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold text-white">Billetera</h1>
+        <p className="text-zinc-500 mt-1">
           Administra tus fondos
         </p>
       </header>
 
-      <div className="flex flex-col items-center justify-center h-64 bg-slate-800 rounded-2xl border border-slate-700">
-        <Wallet size={48} className="text-slate-500 mb-4" />
-        <p className="text-slate-400">Proximamente...</p>
+      <div className="flex flex-col items-center justify-center h-64 bg-zinc-900 rounded-xl border border-zinc-700">
+        <Wallet size={48} className="text-zinc-500 mb-4" />
+        <p className="text-zinc-500">Proximamente...</p>
       </div>
     </div>
   )

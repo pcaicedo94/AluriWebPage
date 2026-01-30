@@ -76,7 +76,7 @@ export default async function InvestorDashboard() {
 
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-zinc-900/50 p-6 rounded-xl border border-zinc-800">
+        <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700">
           <div className="flex items-center justify-between mb-4">
             <span className="text-zinc-500 text-sm">Balance Total</span>
             <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -88,7 +88,7 @@ export default async function InvestorDashboard() {
           </p>
         </div>
 
-        <div className="bg-zinc-900/50 p-6 rounded-xl border border-zinc-800">
+        <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700">
           <div className="flex items-center justify-between mb-4">
             <span className="text-zinc-500 text-sm">Retorno Anual</span>
             <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -99,7 +99,7 @@ export default async function InvestorDashboard() {
           <p className="text-zinc-500 text-sm mt-1">Promedio ponderado</p>
         </div>
 
-        <div className="bg-zinc-900/50 p-6 rounded-xl border border-zinc-800">
+        <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700">
           <div className="flex items-center justify-between mb-4">
             <span className="text-zinc-500 text-sm">Inversiones Activas</span>
             <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -112,7 +112,7 @@ export default async function InvestorDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="bg-zinc-900/50 p-6 rounded-xl border border-zinc-800 lg:col-span-1">
+        <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700 lg:col-span-1">
           <h2 className="text-lg font-semibold mb-6 text-white">Distribucion</h2>
           <div className="h-64">
             <PortfolioChart invested={totalInvested} collected={simulatedCollected} />
@@ -120,14 +120,14 @@ export default async function InvestorDashboard() {
         </div>
       </div>
 
-      <div className="bg-zinc-900/50 p-6 rounded-xl border border-zinc-800">
+      <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700">
         <h2 className="text-lg font-semibold mb-6 text-white">Active Investments</h2>
 
           {investments.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="text-zinc-500 text-sm border-b border-zinc-800">
+                  <tr className="text-zinc-500 text-sm border-b border-zinc-700">
                     <th className="pb-4 font-medium">ID</th>
                     <th className="pb-4 font-medium">INMUEBLE</th>
                     <th className="pb-4 font-medium">MONTO</th>
@@ -142,7 +142,7 @@ export default async function InvestorDashboard() {
                     const statusText = isEnMora ? 'En mora' : 'Al día'
 
                     return (
-                      <tr key={inv.id} className="border-b border-zinc-800/50 hover:bg-zinc-800/30">
+                      <tr key={inv.id} className="border-b border-zinc-700/50 hover:bg-zinc-800/30">
                         <td className="py-4 text-zinc-400">
                           #{inv.loans?.code || 'N/A'}
                         </td>

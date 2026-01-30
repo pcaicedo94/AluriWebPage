@@ -42,10 +42,16 @@ export default function PortfolioChart({ invested, collected }: PortfolioChartPr
           <Tooltip
             formatter={(value: number) => formatCurrency(value)}
             contentStyle={{
-              backgroundColor: '#1e293b',
-              border: '1px solid #334155',
-              borderRadius: '0.75rem',
-              color: '#fff',
+              backgroundColor: '#18181b',
+              border: '1px solid #3f3f46',
+              borderRadius: '0.5rem',
+              color: '#ffffff',
+            }}
+            itemStyle={{
+              color: '#ffffff',
+            }}
+            labelStyle={{
+              color: '#ffffff',
             }}
           />
           <Legend

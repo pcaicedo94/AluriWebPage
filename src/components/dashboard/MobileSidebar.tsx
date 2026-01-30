@@ -21,7 +21,7 @@ export default function MobileSidebar({ user }: MobileSidebarProps) {
       {/* Mobile menu button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-slate-800 text-white border border-slate-700 hover:bg-slate-700 transition-colors"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-zinc-900 text-white border border-zinc-700 hover:bg-zinc-800 transition-colors"
         aria-label="Open menu"
       >
         <Menu size={24} />
@@ -37,12 +37,12 @@ export default function MobileSidebar({ user }: MobileSidebarProps) {
 
       {/* Sidebar */}
       <aside
-        className={`lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 flex flex-col transform transition-transform duration-300 ease-in-out ${
+        className={`lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-black border-r border-zinc-800 flex flex-col transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Header with close button */}
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+        <div className="p-6 border-b border-zinc-800 flex items-center justify-between">
           <Image
             src="/images/AluriLogoBlackBG.png"
             alt="Aluri"
@@ -52,7 +52,7 @@ export default function MobileSidebar({ user }: MobileSidebarProps) {
           />
           <button
             onClick={() => setIsOpen(false)}
-            className="p-1 text-slate-400 hover:text-white transition-colors"
+            className="p-1 text-zinc-400 hover:text-white transition-colors"
             aria-label="Close menu"
           >
             <X size={24} />

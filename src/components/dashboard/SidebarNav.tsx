@@ -38,8 +38,8 @@ export default function SidebarNav() {
       href={href}
       className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
         isActive(href)
-          ? 'bg-primary/10 text-primary border border-primary/20'
-          : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+          ? 'bg-primary text-black font-semibold'
+          : 'text-zinc-400 hover:bg-zinc-900 hover:text-white'
       }`}
     >
       <Icon size={20} />
@@ -56,7 +56,7 @@ export default function SidebarNav() {
       </div>
 
       <div className="mt-8">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-4 mb-3">
+        <p className="text-xs font-semibold text-zinc-600 uppercase tracking-wider px-4 mb-3">
           Cuenta
         </p>
         <div className="space-y-1">
