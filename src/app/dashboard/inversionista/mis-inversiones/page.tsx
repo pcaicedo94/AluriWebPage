@@ -150,13 +150,11 @@ export default async function MisInversionesPage() {
 
               // Actual collected amount from database
               const investedAmount = Number(inv.amount_invested)
-              const roi = Number(inv.roi_percentage) / 100
-              const expectedReturn = investedAmount * roi
               const collectedForInv = Number(inv.amount_collected || 0)
 
-              // Progress percentage (collected / expected return)
-              const progressPercent = expectedReturn > 0
-                ? Math.min((collectedForInv / expectedReturn) * 100, 100)
+              // Progress percentage (collected / invested amount)
+              const progressPercent = investedAmount > 0
+                ? Math.min((collectedForInv / investedAmount) * 100, 100)
                 : 0
 
               return (
@@ -198,8 +196,8 @@ export default async function MisInversionesPage() {
                         style={{ width: `${progressPercent}%` }}
                       />
                     </div>
-                    <span className="text-zinc-400 text-sm min-w-[45px] text-right">
-                      {progressPercent.toFixed(0)}%
+                    <span className="text-zinc-400 text-sm min-w-[55px] text-right">
+                      {progressPercent.toFixed(2)}%
                     </span>
                   </div>
                 </Link>
