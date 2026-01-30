@@ -14,6 +14,8 @@ interface Investment {
     interest_rate: number
     total_amount: number
     start_date: string
+    next_payment_date: string | null
+    amount_overdue: number | null
   } | null
 }
 
@@ -36,7 +38,9 @@ export default async function InvestorDashboard() {
         status,
         interest_rate,
         total_amount,
-        start_date
+        start_date,
+        next_payment_date,
+        amount_overdue
       )
     `)
     .eq('investor_id', user?.id)
@@ -133,8 +137,9 @@ export default async function InvestorDashboard() {
                 </thead>
                 <tbody className="text-sm">
                   {investments.map((inv) => {
-                    const isEnMora = inv.loans?.status === 'mora' || inv.loans?.status === 'late' || inv.loans?.status === 'default'
-                    const statusText = isEnMora ? 'Mora' : 'Al día'
+                    const amountOverdue = Number(inv.loans?.amount_overdue || 0)
+                    const isEnMora = amountOverdue > 0
+                    const statusText = isEnMora ? 'En mora' : 'Al día'
 
                     return (
                       <tr key={inv.id} className="border-b border-zinc-800/50 hover:bg-zinc-800/30">
@@ -150,14 +155,14 @@ export default async function InvestorDashboard() {
                         <td className="py-4">
                           <span className={`px-3 py-1 rounded text-xs font-medium ${
                             isEnMora
-                              ? 'bg-amber-500/20 text-amber-400'
-                              : 'bg-primary/20 text-primary'
+                              ? 'bg-red-500/20 text-red-400'
+                              : 'bg-emerald-500/20 text-emerald-400'
                           }`}>
                             {statusText}
                           </span>
                         </td>
                         <td className="py-4 text-zinc-400">
-                          {inv.loans?.start_date ? new Date(inv.loans.start_date).toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
+                          {inv.loans?.next_payment_date ? new Date(inv.loans.next_payment_date).toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
                         </td>
                       </tr>
                     )
