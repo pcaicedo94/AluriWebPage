@@ -1,5 +1,6 @@
 import { createClient } from '../../../../utils/supabase/server'
-import { Users, UserPlus, Shield } from 'lucide-react'
+import { Users, Shield } from 'lucide-react'
+import NuevoUsuarioButton from './NuevoUsuarioButton'
 
 interface UserProfile {
   id: string
@@ -61,10 +62,7 @@ export default async function AdminUsuariosPage() {
             Bienvenido, Administrador
           </p>
         </div>
-        <button className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-black font-semibold px-4 py-2 rounded-lg transition-colors">
-          <UserPlus size={20} />
-          <span>Nuevo Usuario</span>
-        </button>
+        <NuevoUsuarioButton />
       </header>
 
       {/* Stats Cards */}

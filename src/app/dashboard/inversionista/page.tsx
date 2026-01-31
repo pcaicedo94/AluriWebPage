@@ -74,47 +74,51 @@ export default async function InvestorDashboard() {
         </p>
       </header>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700">
-          <div className="flex items-center justify-between mb-4">
+      {/* KPIs - All in one row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700 min-h-[160px] flex flex-col justify-between">
+          <div className="flex items-center justify-between">
             <span className="text-zinc-500 text-sm">Balance Total</span>
             <div className="p-2 bg-primary/10 rounded-lg text-primary">
               <TrendingUp size={20} />
             </div>
           </div>
-          <p className="text-3xl font-bold text-white">
-            ${totalInvested.toLocaleString('es-CO', { minimumFractionDigits: 2 })}
-          </p>
+          <div>
+            <p className="text-2xl font-bold text-white">
+              ${totalInvested.toLocaleString('es-CO', { minimumFractionDigits: 2 })}
+            </p>
+          </div>
         </div>
 
-        <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700 min-h-[160px] flex flex-col justify-between">
+          <div className="flex items-center justify-between">
             <span className="text-zinc-500 text-sm">Retorno Anual</span>
             <div className="p-2 bg-primary/10 rounded-lg text-primary">
               <Percent size={20} />
             </div>
           </div>
-          <p className="text-3xl font-bold text-white">{weightedRoi.toFixed(1)}%</p>
-          <p className="text-zinc-500 text-sm mt-1">Promedio ponderado</p>
+          <div>
+            <p className="text-2xl font-bold text-white">{weightedRoi.toFixed(1)}%</p>
+            <p className="text-zinc-500 text-sm mt-1">Promedio ponderado</p>
+          </div>
         </div>
 
-        <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700 min-h-[160px] flex flex-col justify-between">
+          <div className="flex items-center justify-between">
             <span className="text-zinc-500 text-sm">Inversiones Activas</span>
             <div className="p-2 bg-primary/10 rounded-lg text-primary">
               <Briefcase size={20} />
             </div>
           </div>
-          <p className="text-3xl font-bold text-white">{activeProjects}</p>
-          <p className="text-zinc-500 text-sm mt-1">Proyectos financiados</p>
+          <div>
+            <p className="text-2xl font-bold text-white">{activeProjects}</p>
+            <p className="text-zinc-500 text-sm mt-1">Proyectos financiados</p>
+          </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700 lg:col-span-1">
-          <h2 className="text-lg font-semibold mb-6 text-white">Distribucion</h2>
-          <div className="h-64">
+        <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700 min-h-[160px] flex flex-col">
+          <h2 className="text-zinc-500 text-sm mb-2">Distribucion</h2>
+          <div className="flex-1">
             <PortfolioChart invested={totalInvested} collected={simulatedCollected} />
           </div>
         </div>
