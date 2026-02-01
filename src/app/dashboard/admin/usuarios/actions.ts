@@ -89,3 +89,66 @@ export async function crearUsuario(formData: FormData) {
 
   return { success: true, userId: data.user.id }
 }
+
+interface UpdateUserData {
+  id: string
+  full_name?: string
+  role?: string
+  verification_status?: string
+}
+
+export async function updateUserProfile(data: UpdateUserData) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return { error: 'Configuracion del servidor incompleta. Contacta al administrador.' }
+  }
+
+  const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
+
+  if (!data.id) {
+    return { error: 'ID de usuario requerido' }
+  }
+
+  // Build update object with only provided fields
+  const updateData: Record<string, string> = {}
+
+  if (data.full_name !== undefined) {
+    updateData.full_name = data.full_name
+  }
+
+  if (data.role !== undefined) {
+    const validRoles = ['inversionista', 'propietario', 'admin']
+    if (!validRoles.includes(data.role)) {
+      return { error: 'Rol invalido' }
+    }
+    updateData.role = data.role
+  }
+
+  if (data.verification_status !== undefined) {
+    const validStatuses = ['pending', 'verified', 'rejected']
+    if (!validStatuses.includes(data.verification_status)) {
+      return { error: 'Estado de verificacion invalido' }
+    }
+    updateData.verification_status = data.verification_status
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    return { error: 'No hay datos para actualizar' }
+  }
+
+  const { error } = await supabaseAdmin
+    .from('profiles')
+    .update(updateData)
+    .eq('id', data.id)
+
+  if (error) {
+    console.error('Error updating profile:', error.message)
+    return { error: 'Error al actualizar perfil: ' + error.message }
+  }
+
+  revalidatePath('/dashboard/admin/usuarios')
+
+  return { success: true }
+}
