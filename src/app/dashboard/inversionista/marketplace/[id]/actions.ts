@@ -63,7 +63,7 @@ export async function getLoanDetail(loanId: string): Promise<{ data: LoanOpportu
     return { data: null, error: error.message }
   }
 
-  return { data: data as LoanOpportunity, error: null }
+  return { data: data as unknown as LoanOpportunity, error: null }
 }
 
 export async function investInLoan(
