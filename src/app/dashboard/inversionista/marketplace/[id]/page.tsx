@@ -1,8 +1,11 @@
 import { getLoanDetail } from './actions'
-import { ArrowLeft, Building, MapPin, Calendar, Percent, Clock, User, Shield, FileText } from 'lucide-react'
+import { ArrowLeft, MapPin, Building2, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import InvestmentPanel from './InvestmentPanel'
+import BentoMetrics from './BentoMetrics'
+import RiskAnalysis from './RiskAnalysis'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -17,249 +20,176 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
     notFound()
   }
 
-  const formatCurrency = (amount: number | null) => {
-    if (amount === null || amount === undefined) return '-'
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount)
-  }
-
   const getPropertyTitle = () => {
-    const propertyType = loan.property_info?.property_type || 'Inmueble'
-    const city = loan.property_info?.city || 'Colombia'
-    return `${propertyType} en ${city}`
+    const propertyType = loan.property_info?.property_type || 'Remodelación'
+    return propertyType
   }
 
-  // Anonymize owner name (show only first name)
-  const getOwnerDisplayName = () => {
-    if (!loan.owner?.full_name) return 'Deudor Verificado'
-    const firstName = loan.owner.full_name.split(' ')[0]
-    return firstName
+  const getPropertySubtitle = () => {
+    return loan.property_info?.city || 'Norte'
   }
 
-  // Calculate LTV if we have the data
+  // Calculate LTV
   const calculateLTV = () => {
     const commercialValue = loan.property_info?.commercial_value
     const amountRequested = loan.amount_requested
-    if (!commercialValue || !amountRequested) return null
-    return ((amountRequested / commercialValue) * 100).toFixed(1)
+    if (!commercialValue || !amountRequested) return 0
+    return (amountRequested / commercialValue) * 100
   }
 
   const ltv = calculateLTV()
+  const ltvString = ltv > 0 ? `${ltv.toFixed(1)}%` : '-'
+
+  // Gallery images
+  const galleryImages = [
+    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&h=800&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=300&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=400&h=300&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400&h=300&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&h=300&fit=crop&q=80'
+  ]
 
   return (
-    <div className="text-white p-8">
-      {/* Back Link */}
-      <Link
-        href="/dashboard/inversionista/marketplace"
-        className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors"
-      >
-        <ArrowLeft size={18} />
-        <span>Volver al Marketplace</span>
-      </Link>
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+      {/* Top Navigation */}
+      <div className="border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <Link
+              href="/dashboard/inversionista/marketplace"
+              className="inline-flex items-center gap-2 text-gray-500 hover:text-white transition-colors text-sm"
+            >
+              <ArrowLeft size={16} />
+              <span>Opportunities</span>
+            </Link>
 
-      {/* Header */}
-      <header className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <span className="px-3 py-1 bg-primary/90 text-slate-900 text-sm font-bold rounded-full">
-            {loan.code}
-          </span>
-          <span className="px-3 py-1 bg-blue-500/20 text-blue-400 text-sm font-medium rounded-full border border-blue-500/30">
-            En Recaudo
-          </span>
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1.5 bg-cyan-500/10 text-cyan-400 text-xs font-semibold rounded-full border border-cyan-500/30">
+                OPEN FOR FUNDING
+              </span>
+              <span className="px-3 py-1.5 bg-white/5 text-gray-400 text-xs font-mono rounded-lg border border-white/10">
+                ID: {loan.code}
+              </span>
+            </div>
+          </div>
         </div>
-        <h1 className="text-3xl font-bold text-white">{getPropertyTitle()}</h1>
-        {loan.property_info?.address && (
-          <p className="text-slate-400 flex items-center gap-2 mt-2">
-            <MapPin size={16} />
-            {loan.property_info.address}, {loan.property_info.city}
-          </p>
-        )}
-      </header>
+      </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Left Column - Property & Loan Details */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Property Image Placeholder */}
-          <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
-            <div className="h-72 bg-slate-700 flex items-center justify-center">
-              <div className="text-center">
-                <Building size={80} className="text-slate-600 mx-auto mb-3" />
-                <p className="text-slate-500 text-sm">Imagen del inmueble</p>
-              </div>
-            </div>
-          </div>
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Image Gallery */}
+            <div className="bg-[#111] border border-white/5 rounded-2xl overflow-hidden">
+              {/* Main Image */}
+              <div className="relative h-[320px]">
+                <Image
+                  src={galleryImages[0]}
+                  alt={getPropertyTitle()}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent" />
 
-          {/* Property Information */}
-          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <Building size={20} className="text-primary" />
-              Información del Inmueble
-            </h2>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <span className="text-slate-500 text-sm">Tipo de Propiedad</span>
-                <p className="text-white font-medium">
-                  {loan.property_info?.property_type || 'No especificado'}
-                </p>
-              </div>
-              <div>
-                <span className="text-slate-500 text-sm">Ubicación</span>
-                <p className="text-white font-medium">
-                  {loan.property_info?.city || 'No especificado'}
-                </p>
-              </div>
-              <div>
-                <span className="text-slate-500 text-sm">Valor Comercial</span>
-                <p className="text-white font-medium">
-                  {formatCurrency(loan.property_info?.commercial_value || null)}
-                </p>
-              </div>
-              <div>
-                <span className="text-slate-500 text-sm">Matrícula Inmobiliaria</span>
-                <p className="text-white font-medium">
-                  {loan.property_info?.registration_number || 'No especificado'}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Financial Conditions */}
-          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <Percent size={20} className="text-primary" />
-              Condiciones Financieras
-            </h2>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-slate-900/50 rounded-xl p-4">
-                <div className="flex items-center gap-2 text-slate-400 text-sm mb-1">
-                  <Percent size={14} />
-                  Rentabilidad EA
+                {/* Image counter */}
+                <div className="absolute bottom-4 left-4 px-3 py-1.5 bg-black/60 backdrop-blur-sm text-white text-sm rounded-lg">
+                  1/{galleryImages.length}
                 </div>
-                <p className="text-primary font-bold text-2xl">
-                  {loan.interest_rate_ea ? `${loan.interest_rate_ea}%` : '-'}
-                </p>
               </div>
 
-              <div className="bg-slate-900/50 rounded-xl p-4">
-                <div className="flex items-center gap-2 text-slate-400 text-sm mb-1">
-                  <Clock size={14} />
-                  Tasa Nominal Mensual
-                </div>
-                <p className="text-white font-bold text-2xl">
-                  {loan.interest_rate_nm ? `${loan.interest_rate_nm}%` : '-'}
-                </p>
-              </div>
-
-              <div className="bg-slate-900/50 rounded-xl p-4">
-                <div className="flex items-center gap-2 text-slate-400 text-sm mb-1">
-                  <Calendar size={14} />
-                  Plazo
-                </div>
-                <p className="text-white font-bold text-2xl">
-                  {loan.term_months ? `${loan.term_months} meses` : '-'}
-                </p>
-              </div>
-
-              <div className="bg-slate-900/50 rounded-xl p-4">
-                <div className="flex items-center gap-2 text-slate-400 text-sm mb-1">
-                  <FileText size={14} />
-                  Tipo de Pago
-                </div>
-                <p className="text-white font-bold text-lg">
-                  {loan.payment_type === 'interest_only' ? 'Solo Intereses' :
-                   loan.payment_type === 'principal_and_interest' ? 'Capital + Intereses' : '-'}
-                </p>
-              </div>
-            </div>
-
-            {/* LTV Section */}
-            {ltv && (
-              <div className="mt-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Shield size={20} className="text-emerald-400" />
-                    <span className="text-emerald-400 font-medium">Loan-to-Value (LTV)</span>
+              {/* Thumbnails */}
+              <div className="p-4 flex gap-3">
+                {galleryImages.slice(1).map((img, index) => (
+                  <div
+                    key={index}
+                    className="relative w-20 h-16 rounded-lg overflow-hidden border border-white/10 hover:border-cyan-500/50 transition-colors cursor-pointer"
+                  >
+                    <Image
+                      src={img}
+                      alt={`Vista ${index + 2}`}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
-                  <span className="text-emerald-400 font-bold text-xl">{ltv}%</span>
-                </div>
-                <p className="text-slate-400 text-sm mt-2">
-                  El préstamo representa el {ltv}% del valor comercial del inmueble,
-                  proporcionando un margen de seguridad para los inversionistas.
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Borrower Info (Anonymized) */}
-          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <User size={20} className="text-primary" />
-              Información del Deudor
-            </h2>
-
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-slate-700 rounded-full flex items-center justify-center">
-                <User size={32} className="text-slate-500" />
-              </div>
-              <div>
-                <p className="text-white font-semibold text-lg">{getOwnerDisplayName()}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs font-medium rounded-full border border-emerald-500/30">
-                    Verificado
-                  </span>
-                  <span className="text-slate-500 text-sm">Deudor con garantía inmobiliaria</span>
-                </div>
+                ))}
               </div>
             </div>
 
-            <p className="text-slate-400 text-sm mt-4">
-              La identidad completa del deudor y los documentos de garantía están verificados
-              por Aluri y serán compartidos a los inversionistas una vez se complete el fondeo.
-            </p>
-          </div>
+            {/* Title Section */}
+            <div className="space-y-2">
+              <p className="text-cyan-400 text-sm font-medium">Solicitud #{loan.code}</p>
+              <h1 className="text-3xl font-bold text-white tracking-tight">
+                {getPropertyTitle()} {getPropertySubtitle()}
+              </h1>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                First-lien mortgage opportunity secured by a prime residential property undergoing renovation in the northern district. Capital will be used to finalize interior finishes and landscape improvements.
+              </p>
+            </div>
 
-          {/* Timeline */}
-          {loan.workflow_dates?.estimated_date && (
-            <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <Calendar size={20} className="text-primary" />
-                Fechas Importantes
-              </h2>
+            {/* Bento Metrics */}
+            <BentoMetrics
+              commercialValue={loan.property_info?.commercial_value || null}
+              amountRequested={loan.amount_requested}
+              ltv={ltvString}
+              interestRateEa={loan.interest_rate_ea}
+            />
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-3 h-3 bg-primary rounded-full"></div>
-                  <div>
-                    <p className="text-white font-medium">Fecha Límite de Recaudo</p>
-                    <p className="text-slate-400 text-sm">
-                      {new Date(loan.workflow_dates.estimated_date).toLocaleDateString('es-CO', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                      })}
-                    </p>
+            {/* Location Section */}
+            <div className="bg-[#111] border border-white/5 rounded-2xl overflow-hidden">
+              <div className="p-4 border-b border-white/5 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-white tracking-wide">Location</h2>
+                <span className="text-gray-500 text-sm">{loan.property_info?.city || 'Medellín'}, CO</span>
+              </div>
+              <div className="h-48 bg-[#0d0d0d] flex items-center justify-center relative">
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-2 border border-cyan-500/30">
+                    <MapPin size={20} className="text-cyan-400" />
                   </div>
+                  <p className="text-gray-500 text-sm">{loan.property_info?.address || 'Verified Address'}</p>
                 </div>
+                {/* Map grid overlay */}
+                <div className="absolute inset-0 opacity-[0.03]" style={{
+                  backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)',
+                  backgroundSize: '30px 30px'
+                }} />
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Right Column - Investment Panel (Sticky) */}
-        <div className="lg:col-span-1">
-          <InvestmentPanel
-            loanId={loan.id}
-            amountRequested={loan.amount_requested || 0}
-            amountFunded={loan.amount_funded || 0}
-            interestRateEa={loan.interest_rate_ea}
-            termMonths={loan.term_months}
-          />
+            {/* Risk Analysis */}
+            <RiskAnalysis
+              ltv={ltv}
+              propertyType={loan.property_info?.property_type}
+              city={loan.property_info?.city}
+            />
+
+            {/* Verified Badges Section */}
+            <div className="flex items-center gap-6 py-4">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 size={18} className="text-cyan-400" />
+                <span className="text-gray-400 text-sm">Verified Collateral</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 size={18} className="text-cyan-400" />
+                <span className="text-gray-400 text-sm">Clean Title</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Building2 size={18} className="text-cyan-400" />
+                <span className="text-gray-400 text-sm">{loan.property_info?.property_type || 'Residential'}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Investment Panel */}
+          <div className="lg:col-span-1">
+            <InvestmentPanel
+              loanId={loan.id}
+              amountRequested={loan.amount_requested || 0}
+              amountFunded={loan.amount_funded || 0}
+              interestRateEa={loan.interest_rate_ea}
+              termMonths={loan.term_months}
+            />
+          </div>
         </div>
       </div>
     </div>

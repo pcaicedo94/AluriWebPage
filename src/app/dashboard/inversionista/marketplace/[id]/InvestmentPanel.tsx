@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { investInLoan } from './actions'
+import { CheckCircle, AlertCircle, Loader2, Info } from 'lucide-react'
 
 interface InvestmentPanelProps {
   loanId: string
@@ -27,6 +28,8 @@ export default function InvestmentPanel({
 
   const remainingAmount = amountRequested - amountFunded
   const progress = amountRequested > 0 ? (amountFunded / amountRequested) * 100 : 0
+  const minInvestment = 1000000
+  const maxInvestment = remainingAmount
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -37,8 +40,30 @@ export default function InvestmentPanel({
     }).format(value)
   }
 
+  const formatCompactCurrency = (value: number) => {
+    if (value >= 1000000) {
+      return `$${(value / 1000000).toFixed(0)}M`
+    }
+    return formatCurrency(value)
+  }
+
+  // Calculate estimated return
+  const estimatedReturn = useMemo(() => {
+    const numericAmount = parseFloat(amount.replace(/[^0-9]/g, '')) || 0
+    if (numericAmount <= 0 || !interestRateEa || !termMonths) return null
+
+    const annualReturn = numericAmount * (interestRateEa / 100)
+    const monthlyReturn = annualReturn / 12
+    const totalReturn = monthlyReturn * termMonths
+
+    return {
+      total: numericAmount + totalReturn,
+      profit: totalReturn,
+      percentage: interestRateEa
+    }
+  }, [amount, interestRateEa, termMonths])
+
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Only allow numbers
     const value = e.target.value.replace(/[^0-9]/g, '')
     setAmount(value)
     setError(null)
@@ -61,6 +86,11 @@ export default function InvestmentPanel({
       return
     }
 
+    if (numericAmount < minInvestment) {
+      setError(`El monto mínimo de inversión es ${formatCurrency(minInvestment)}.`)
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -69,7 +99,6 @@ export default function InvestmentPanel({
       if (result.success) {
         setSuccess(result.message)
         setAmount('')
-        // Redirect after a short delay to show success message
         setTimeout(() => {
           router.push('/dashboard/inversionista/mis-inversiones')
         }, 2000)
@@ -83,138 +112,129 @@ export default function InvestmentPanel({
     }
   }
 
-  const quickAmounts = [1000000, 5000000, 10000000, 20000000].filter(a => a <= remainingAmount)
-
   return (
-    <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6 sticky top-8">
-      <h3 className="text-xl font-bold text-white mb-6">Invertir en esta Oportunidad</h3>
+    <div className="bg-[#111] border border-white/10 rounded-2xl overflow-hidden sticky top-6">
+      {/* Header */}
+      <div className="p-5 border-b border-white/10">
+        <h3 className="text-xl font-bold text-white tracking-tight">Invest Now</h3>
+      </div>
 
-      {/* Progress Section */}
-      <div className="mb-6">
-        <div className="flex justify-between text-sm mb-2">
-          <span className="text-slate-400">Progreso de Recaudo</span>
-          <span className="text-primary font-bold">{progress.toFixed(0)}%</span>
-        </div>
-        <div className="h-3 bg-slate-700 rounded-full overflow-hidden mb-3">
-          <div
-            className="h-full bg-gradient-to-r from-primary to-emerald-400 rounded-full transition-all"
-            style={{ width: `${Math.min(progress, 100)}%` }}
-          />
-        </div>
-        <div className="flex justify-between text-sm">
-          <div>
-            <span className="text-slate-500">Recaudado</span>
-            <p className="text-primary font-semibold">{formatCurrency(amountFunded)}</p>
+      <div className="p-5">
+        {/* Investment Input */}
+        <form onSubmit={handleSubmit}>
+          <div className="mb-5">
+            <label htmlFor="amount" className="block text-sm text-gray-500 mb-3">
+              ¿Cuánto quieres invertir?
+            </label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg">$</span>
+              <input
+                type="text"
+                id="amount"
+                value={amount ? Number(amount).toLocaleString('es-CO') : ''}
+                onChange={handleAmountChange}
+                placeholder="20,000,000"
+                className="w-full pl-10 pr-4 py-4 bg-transparent border border-white/10 rounded-xl text-white text-2xl font-bold focus:outline-none focus:border-teal-400/50 transition-all placeholder-gray-700"
+                disabled={isLoading || remainingAmount <= 0}
+              />
+            </div>
+            <div className="flex justify-between mt-2 text-xs text-gray-600">
+              <span>Min: {formatCompactCurrency(minInvestment)}</span>
+              <span>Max: {formatCompactCurrency(maxInvestment)}</span>
+            </div>
           </div>
-          <div className="text-right">
-            <span className="text-slate-500">Meta</span>
-            <p className="text-white font-semibold">{formatCurrency(amountRequested)}</p>
+
+          {/* Return Calculator */}
+          {estimatedReturn && estimatedReturn.profit > 0 && (
+            <div className="mb-5 space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-500 text-sm">Retorno Estimado</span>
+                <span className="text-teal-400 font-semibold">+ {estimatedReturn.percentage}%</span>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Tu Ganancia</p>
+                <p className="text-3xl font-bold text-white tracking-tight">
+                  {formatCurrency(estimatedReturn.profit)}
+                </p>
+                <p className="text-gray-600 text-sm mt-1">en {termMonths} meses</p>
+              </div>
+            </div>
+          )}
+
+          {/* Progress Bar */}
+          <div className="mb-5">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-gray-500 text-xs uppercase tracking-wider">Progreso de Fondeo</span>
+              <span className="text-teal-400 text-sm font-semibold">{progress.toFixed(0)}%</span>
+            </div>
+            <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-teal-400 to-teal-400 rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(45,212,191,0.5)]"
+                style={{ width: `${Math.min(progress, 100)}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
+              <AlertCircle size={16} className="text-red-400 mt-0.5 flex-shrink-0" />
+              <p className="text-red-400 text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Success Message */}
+          {success && (
+            <div className="mb-4 p-3 bg-teal-400/10 border border-teal-400/20 rounded-xl flex items-start gap-3">
+              <CheckCircle size={16} className="text-teal-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-teal-400 text-sm font-medium">{success}</p>
+                <p className="text-teal-400/70 text-xs mt-1">Redirigiendo...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isLoading || !amount || remainingAmount <= 0}
+            className="w-full py-4 bg-teal-400 hover:bg-teal-400 disabled:bg-gray-800 disabled:cursor-not-allowed text-black disabled:text-gray-600 font-bold text-base rounded-xl transition-all shadow-[0_0_30px_rgba(45,212,191,0.3)] hover:shadow-[0_0_40px_rgba(45,212,191,0.5)] disabled:shadow-none"
+          >
+            {isLoading ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 size={18} className="animate-spin" />
+                Procesando...
+              </span>
+            ) : (
+              'Confirmar Inversión'
+            )}
+          </button>
+
+          {remainingAmount <= 0 && (
+            <p className="text-center text-gray-600 text-sm mt-3">
+              Esta oportunidad ya está completamente financiada.
+            </p>
+          )}
+        </form>
+
+        {/* Disclaimer */}
+        <div className="mt-5 pt-5 border-t border-white/5">
+          <p className="text-gray-600 text-xs leading-relaxed">
+            By clicking confirm, you agree to the Terms of Service and Risk Disclosure Statement for Mortgage Investment #{loanId.slice(0, 4)}.
+          </p>
+        </div>
+
+        {/* Info Box */}
+        <div className="mt-4 p-3 bg-white/5 rounded-xl border border-white/5">
+          <div className="flex items-start gap-2">
+            <Info size={14} className="text-gray-500 mt-0.5 flex-shrink-0" />
+            <p className="text-gray-500 text-xs">
+              Funds are held in escrow until the total amount is reached. If not funded within 14 days, your investment is returned in full.
+            </p>
           </div>
         </div>
       </div>
-
-      {/* Key Stats */}
-      <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-slate-900/50 rounded-xl">
-        <div>
-          <span className="text-slate-500 text-xs">Rentabilidad EA</span>
-          <p className="text-primary font-bold text-lg">
-            {interestRateEa ? `${interestRateEa}%` : '-'}
-          </p>
-        </div>
-        <div>
-          <span className="text-slate-500 text-xs">Plazo</span>
-          <p className="text-white font-bold text-lg">
-            {termMonths ? `${termMonths} meses` : '-'}
-          </p>
-        </div>
-      </div>
-
-      {/* Remaining Amount */}
-      <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-        <span className="text-emerald-400 text-sm">Disponible para invertir</span>
-        <p className="text-emerald-400 font-bold text-2xl">{formatCurrency(remainingAmount)}</p>
-      </div>
-
-      {/* Investment Form */}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label htmlFor="amount" className="block text-sm text-slate-400 mb-2">
-            ¿Cuánto quieres invertir?
-          </label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">$</span>
-            <input
-              type="text"
-              id="amount"
-              value={amount ? Number(amount).toLocaleString('es-CO') : ''}
-              onChange={handleAmountChange}
-              placeholder="0"
-              className="w-full pl-8 pr-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white text-lg font-semibold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-              disabled={isLoading || remainingAmount <= 0}
-            />
-          </div>
-        </div>
-
-        {/* Quick Amount Buttons */}
-        {quickAmounts.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-6">
-            {quickAmounts.map((quickAmount) => (
-              <button
-                key={quickAmount}
-                type="button"
-                onClick={() => setAmount(quickAmount.toString())}
-                className="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-colors"
-                disabled={isLoading}
-              >
-                {formatCurrency(quickAmount)}
-              </button>
-            ))}
-            <button
-              type="button"
-              onClick={() => setAmount(remainingAmount.toString())}
-              className="px-3 py-1.5 text-xs bg-primary/20 hover:bg-primary/30 text-primary rounded-lg transition-colors"
-              disabled={isLoading}
-            >
-              Máximo
-            </button>
-          </div>
-        )}
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
-            <p className="text-red-400 text-sm">{error}</p>
-          </div>
-        )}
-
-        {/* Success Message */}
-        {success && (
-          <div className="mb-4 p-3 bg-emerald-500/20 border border-emerald-500/30 rounded-lg">
-            <p className="text-emerald-400 text-sm">{success}</p>
-            <p className="text-emerald-400/70 text-xs mt-1">Redirigiendo...</p>
-          </div>
-        )}
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={isLoading || !amount || remainingAmount <= 0}
-          className="w-full py-4 bg-primary hover:bg-primary-dark disabled:bg-slate-600 disabled:cursor-not-allowed text-slate-900 font-bold text-lg rounded-xl transition-colors"
-        >
-          {isLoading ? 'Procesando...' : 'Confirmar Inversión'}
-        </button>
-
-        {remainingAmount <= 0 && (
-          <p className="text-center text-slate-500 text-sm mt-3">
-            Esta oportunidad ya está completamente financiada.
-          </p>
-        )}
-      </form>
-
-      {/* Disclaimer */}
-      <p className="text-slate-500 text-xs mt-6 text-center">
-        Al confirmar, reservarás tu cupo. Deberás completar el pago para finalizar la inversión.
-      </p>
     </div>
   )
 }

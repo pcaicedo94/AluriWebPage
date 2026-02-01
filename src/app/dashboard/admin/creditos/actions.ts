@@ -239,7 +239,7 @@ export async function getLoanById(loanId: string): Promise<{ data: LoanDetail | 
     return { data: null, error: error.message }
   }
 
-  return { data: data as LoanDetail, error: null }
+  return { data: data as unknown as LoanDetail, error: null }
 }
 
 export async function getLoanCosigners(loanId: string): Promise<{ data: LoanCosigner[]; error: string | null }> {
@@ -296,7 +296,7 @@ export async function getLoanInvestments(loanId: string): Promise<{ data: LoanIn
     amount: inv.amount_invested
   }))
 
-  return { data: investments as LoanInvestment[], error: null }
+  return { data: investments as unknown as LoanInvestment[], error: null }
 }
 
 export async function publishLoan(loanId: string): Promise<{ success: boolean; error?: string }> {
