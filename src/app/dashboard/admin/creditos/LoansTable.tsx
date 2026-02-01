@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import { FileText } from 'lucide-react'
 import { LoanData } from './actions'
+import Link from 'next/link'
 
 interface LoansTableProps {
   loans: LoanData[]
@@ -110,11 +110,12 @@ export default function LoansTable({ loans }: LoansTableProps) {
                     {renderDaysPastDue(loan.days_past_due)}
                   </td>
                   <td className="py-4 px-3 text-center">
-                    <button
-                      className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs font-medium rounded-lg border border-amber-500/30 transition-colors"
+                    <Link
+                      href={`/dashboard/admin/creditos/${loan.id}`}
+                      className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs font-medium rounded-lg border border-amber-500/30 transition-colors inline-block"
                     >
                       Gestionar
-                    </button>
+                    </Link>
                   </td>
                 </tr>
               ))}

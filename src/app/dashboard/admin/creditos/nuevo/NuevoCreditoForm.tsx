@@ -32,8 +32,7 @@ export default function NuevoCreditoForm({ propietarios }: NuevoCreditoFormProps
   const [interestRateEa, setInterestRateEa] = useState('')
   const [termMonths, setTermMonths] = useState('')
   const [paymentType, setPaymentType] = useState<'interest_only' | 'principal_and_interest'>('interest_only')
-  const [signatureDate, setSignatureDate] = useState('')
-  const [disbursementDate, setDisbursementDate] = useState('')
+  const [estimatedDate, setEstimatedDate] = useState('')
 
   // Section C: Codeudores
   const [cosigners, setCosigners] = useState<Cosigner[]>([])
@@ -79,8 +78,9 @@ export default function NuevoCreditoForm({ propietarios }: NuevoCreditoFormProps
         term_months: parseInt(termMonths) || 0,
         payment_type: paymentType,
         dates: {
-          signature_date: signatureDate || null,
-          disbursement_date: disbursementDate || null
+          signature_date: null,
+          disbursement_date: null,
+          estimated_date: estimatedDate || null
         },
         cosigners: cosigners
       }
@@ -340,33 +340,23 @@ export default function NuevoCreditoForm({ propietarios }: NuevoCreditoFormProps
               </div>
 
               <div className="border-t border-slate-700 pt-6 mt-6">
-                <h4 className="text-md font-medium text-slate-300 mb-4">Fechas</h4>
+                <h4 className="text-md font-medium text-slate-300 mb-4">Fechas Estimadas</h4>
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className={labelClass} htmlFor="signatureDate">
-                      Fecha de Firma
+                    <label className={labelClass} htmlFor="estimatedDate">
+                      Fecha Limite de Recaudo
                     </label>
                     <input
                       type="date"
-                      id="signatureDate"
-                      value={signatureDate}
-                      onChange={(e) => setSignatureDate(e.target.value)}
+                      id="estimatedDate"
+                      value={estimatedDate}
+                      onChange={(e) => setEstimatedDate(e.target.value)}
                       className={inputClass}
                     />
-                  </div>
-
-                  <div>
-                    <label className={labelClass} htmlFor="disbursementDate">
-                      Fecha de Desembolso
-                    </label>
-                    <input
-                      type="date"
-                      id="disbursementDate"
-                      value={disbursementDate}
-                      onChange={(e) => setDisbursementDate(e.target.value)}
-                      className={inputClass}
-                    />
+                    <p className="text-xs text-slate-500 mt-1">
+                      Las fechas de firma y desembolso se definiran cuando se complete el fondeo.
+                    </p>
                   </div>
                 </div>
               </div>

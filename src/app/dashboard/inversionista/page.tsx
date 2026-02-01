@@ -11,7 +11,7 @@ interface Investment {
   loans: {
     code: string
     status: string
-    interest_rate: number
+    interest_rate_ea: number
     total_amount: number
     start_date: string
     next_payment_date: string | null
@@ -36,7 +36,7 @@ export default async function InvestorDashboard() {
       loans (
         code,
         status,
-        interest_rate,
+        interest_rate_ea,
         total_amount,
         start_date,
         next_payment_date,
