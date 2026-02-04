@@ -12,6 +12,12 @@ interface PropertyInfo {
   commercial_value?: number
 }
 
+// Payment record from loan_payments table
+interface LoanPayment {
+  amount_capital: number
+  amount_interest: number
+}
+
 // Updated interface with correct column names
 interface Loan {
   code: string
@@ -21,6 +27,7 @@ interface Loan {
   amount_funded: number | null
   term_months: number | null
   property_info: PropertyInfo | null
+  loan_payments: LoanPayment[]
 }
 
 interface Investment {
@@ -49,10 +56,19 @@ export default async function MisInversionesPage() {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Fetch ALL investments - simplified query without loan.status filters (filter in frontend)
+  // Fetch ALL investments with loan payments for real progress tracking
   const { data: rawData, error } = await supabase
     .from('investments')
-    .select('*, loan:loans!inner(*)')
+    .select(`
+      *,
+      loan:loans!inner (
+        *,
+        loan_payments (
+          amount_capital,
+          amount_interest
+        )
+      )
+    `)
     .eq('investor_id', user?.id)
     .eq('status', 'active')
     .order('created_at', { ascending: false })
@@ -63,14 +79,15 @@ export default async function MisInversionesPage() {
 
   const investments = (rawData || []) as unknown as Investment[]
 
-  // Filter for KPI calculations (only active loan status)
-  const activeInvestments = investments.filter(inv => inv.loan?.status === 'active')
+  // Filter for KPI calculations (active + defaulted loan status)
+  const activeInvestments = investments.filter(inv =>
+    inv.loan?.status === 'active' || inv.loan?.status === 'defaulted'
+  )
 
-  // KPI Calculations (based on active investments only)
+  // KPI Calculations
   const cantidadInversiones = investments.length
   const cantidadActivas = activeInvestments.length
   const montoInvertidoTotal = investments.reduce((sum, inv) => sum + Number(inv.amount_invested || 0), 0)
-  const montoActivoTotal = activeInvestments.reduce((sum, inv) => sum + Number(inv.amount_invested || 0), 0)
 
   // Calculate weighted average rate using interest_rate_investor or loan's interest_rate_ea
   const rentabilidadPromedio = montoInvertidoTotal > 0
@@ -80,12 +97,33 @@ export default async function MisInversionesPage() {
       }, 0) / montoInvertidoTotal
     : 0
 
-  // For now, simulate collected as 15% of expected returns (to be replaced with actual payment tracking)
-  const expectedAnnualReturn = montoActivoTotal * (rentabilidadPromedio / 100)
-  const recaudadoTotal = expectedAnnualReturn * 0.15 // Simulated
+  // Calculate REAL collected amounts based on loan_payments (pro-rated by participation)
+  let totalCapitalRecuperado = 0
+  let totalInteresesGanados = 0
 
-  // Capital vigente = Total invertido activo - Recaudado
-  const capitalVigente = montoActivoTotal - recaudadoTotal
+  investments.forEach(inv => {
+    const loan = inv.loan
+    if (!loan || !loan.loan_payments) return
+
+    const amountRequested = loan.amount_requested || 0
+    const amountInvested = inv.amount_invested || 0
+
+    // Calculate investor's share (participation percentage)
+    const share = amountRequested > 0 ? amountInvested / amountRequested : 0
+
+    // Sum all payments for this loan
+    const totalLoanCapital = loan.loan_payments.reduce((sum, p) => sum + (p.amount_capital || 0), 0)
+    const totalLoanInterest = loan.loan_payments.reduce((sum, p) => sum + (p.amount_interest || 0), 0)
+
+    // Pro-rate by investor's share
+    totalCapitalRecuperado += totalLoanCapital * share
+    totalInteresesGanados += totalLoanInterest * share
+  })
+
+  const recaudadoTotal = totalCapitalRecuperado + totalInteresesGanados
+
+  // Capital vigente = Total invertido - Capital recuperado
+  const capitalVigente = montoInvertidoTotal - totalCapitalRecuperado
 
   return (
     <div className="text-white p-8">
@@ -121,6 +159,14 @@ export default async function MisInversionesPage() {
             <div className="flex justify-between items-center py-3 border-b border-zinc-700">
               <span className="text-zinc-500">Capital Invertido Vigente</span>
               <span className="text-2xl font-bold text-white">{formatCOP(capitalVigente)}</span>
+            </div>
+            <div className="flex justify-between items-center py-3 border-b border-zinc-700">
+              <span className="text-zinc-500">Capital Recuperado</span>
+              <span className="text-2xl font-bold text-blue-400">{formatCOP(totalCapitalRecuperado)}</span>
+            </div>
+            <div className="flex justify-between items-center py-3 border-b border-zinc-700">
+              <span className="text-zinc-500">Intereses Ganados</span>
+              <span className="text-2xl font-bold text-amber-400">{formatCOP(totalInteresesGanados)}</span>
             </div>
             <div className="flex justify-between items-center py-3">
               <span className="text-zinc-500">Recaudado Total</span>

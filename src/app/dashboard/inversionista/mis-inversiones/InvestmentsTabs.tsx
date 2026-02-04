@@ -11,6 +11,12 @@ interface PropertyInfo {
   commercial_value?: number
 }
 
+// Payment record from loan_payments table
+interface LoanPayment {
+  amount_capital: number
+  amount_interest: number
+}
+
 interface Loan {
   code: string
   status: string
@@ -19,6 +25,7 @@ interface Loan {
   amount_funded: number | null
   term_months: number | null
   property_info: PropertyInfo | null
+  loan_payments: LoanPayment[]
 }
 
 interface Investment {
@@ -30,6 +37,38 @@ interface Investment {
   confirmed_at: string | null
   loan_id: string
   loan: Loan | null
+}
+
+// Calculate pro-rated values for an investment based on loan payments
+function calculateInvestmentProgress(inv: Investment): {
+  share: number
+  capitalRecuperado: number
+  interesesGanados: number
+  progressPercent: number
+} {
+  const loan = inv.loan
+  if (!loan || !loan.loan_payments || loan.loan_payments.length === 0) {
+    return { share: 0, capitalRecuperado: 0, interesesGanados: 0, progressPercent: 0 }
+  }
+
+  const amountRequested = loan.amount_requested || 0
+  const amountInvested = inv.amount_invested || 0
+
+  // Calculate investor's share (participation percentage)
+  const share = amountRequested > 0 ? amountInvested / amountRequested : 0
+
+  // Sum all payments for this loan
+  const totalLoanCapital = loan.loan_payments.reduce((sum, p) => sum + (p.amount_capital || 0), 0)
+  const totalLoanInterest = loan.loan_payments.reduce((sum, p) => sum + (p.amount_interest || 0), 0)
+
+  // Pro-rate by investor's share
+  const capitalRecuperado = totalLoanCapital * share
+  const interesesGanados = totalLoanInterest * share
+
+  // Progress = capital recovered / amount invested (for bullet loans, stays at 0% until final payment)
+  const progressPercent = amountInvested > 0 ? (capitalRecuperado / amountInvested) * 100 : 0
+
+  return { share, capitalRecuperado, interesesGanados, progressPercent }
 }
 
 interface InvestmentsTabsProps {
@@ -169,7 +208,7 @@ function ActiveInvestmentsTable({
               <th className="px-4 py-3 text-right text-xs font-semibold text-zinc-400 uppercase">Mi Inversion</th>
               <th className="px-4 py-3 text-right text-xs font-semibold text-zinc-400 uppercase">Tasa</th>
               <th className="px-4 py-3 text-center text-xs font-semibold text-zinc-400 uppercase">Estado</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-400 uppercase">Proximo Pago</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-400 uppercase">Progreso / Ganancias</th>
               <th className="px-4 py-3 text-center text-xs font-semibold text-zinc-400 uppercase">Acciones</th>
             </tr>
           </thead>
@@ -181,10 +220,8 @@ function ActiveInvestmentsTable({
               const rate = inv.interest_rate_investor || loan?.interest_rate_ea || 0
               const loanStatus = loan?.status || 'pending'
 
-              // Simulate next payment date (first of next month)
-              const nextPaymentDate = new Date()
-              nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1)
-              nextPaymentDate.setDate(1)
+              // Calculate real progress from payments
+              const { capitalRecuperado, interesesGanados, progressPercent } = calculateInvestmentProgress(inv)
 
               return (
                 <tr key={inv.id} className="hover:bg-zinc-800/30 transition-colors">
@@ -209,9 +246,32 @@ function ActiveInvestmentsTable({
                     {getStatusBadge(loanStatus)}
                   </td>
                   <td className="px-4 py-4">
-                    <div className="flex items-center gap-2 text-sm text-zinc-400">
-                      <Calendar size={14} />
-                      <span>{formatDate(nextPaymentDate.toISOString())}</span>
+                    <div className="w-36">
+                      {/* Progress bar */}
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-zinc-500">Capital: {progressPercent.toFixed(0)}%</span>
+                      </div>
+                      <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden mb-2">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            progressPercent >= 100 ? 'bg-emerald-500' : 'bg-teal-500'
+                          }`}
+                          style={{ width: `${Math.min(100, progressPercent)}%` }}
+                        />
+                      </div>
+                      {/* Earnings display */}
+                      <div className="text-xs">
+                        <span className="text-amber-400 font-medium">
+                          Intereses: {formatCOP(interesesGanados)}
+                        </span>
+                      </div>
+                      {capitalRecuperado > 0 && (
+                        <div className="text-xs mt-0.5">
+                          <span className="text-blue-400">
+                            Recuperado: {formatCOP(capitalRecuperado)}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </td>
                   <td className="px-4 py-4 text-center">
