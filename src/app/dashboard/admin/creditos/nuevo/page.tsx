@@ -11,7 +11,7 @@ export default async function NuevoCreditoPage() {
   return (
     <div className="text-white p-8">
       <header className="mb-8 border-b border-slate-800 pb-6">
-        <h1 className="text-3xl font-bold text-amber-400">Nuevo Credito</h1>
+        <h1 className="text-3xl font-bold text-emerald-400">Nuevo Credito</h1>
         <p className="text-slate-400 mt-1">
           Completa el formulario para crear un nuevo credito
         </p>

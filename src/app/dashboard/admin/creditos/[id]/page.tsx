@@ -93,7 +93,7 @@ export default async function LoanDetailPage({ params }: PageProps) {
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
           <div>
             <div className="flex items-center gap-4 mb-2">
-              <h1 className="text-3xl font-bold text-amber-400">{loan.code}</h1>
+              <h1 className="text-3xl font-bold text-emerald-400">{loan.code}</h1>
               <span className={`px-4 py-1.5 rounded-full text-sm font-semibold border ${statusConfig.className}`}>
                 {statusConfig.label}
               </span>

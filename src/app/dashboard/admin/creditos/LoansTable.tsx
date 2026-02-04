@@ -90,7 +90,7 @@ export default function LoansTable({ loans }: LoansTableProps) {
               {loans.map((loan) => (
                 <tr key={loan.id} className="border-b border-slate-700/50 hover:bg-slate-700/30">
                   <td className="py-4 px-3">
-                    <span className="font-mono font-semibold text-primary">
+                    <span className="font-mono font-semibold text-emerald-400">
                       {loan.code}
                     </span>
                   </td>

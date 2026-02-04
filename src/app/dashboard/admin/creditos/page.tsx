@@ -37,7 +37,7 @@ export default async function AdminCreditosPage() {
     <div className="text-white p-8">
       <header className="mb-8 border-b border-slate-800 pb-6 flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-amber-400">Gestion de Creditos</h1>
+          <h1 className="text-3xl font-bold text-emerald-400">Gestion de Creditos</h1>
           <p className="text-slate-400 mt-1">
             Administra los creditos y su estado
           </p>
