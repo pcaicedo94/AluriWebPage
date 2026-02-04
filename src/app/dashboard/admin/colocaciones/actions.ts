@@ -111,7 +111,8 @@ interface CreateUserData {
 }
 
 async function createUserWithProfile(
-  supabaseAdmin: ReturnType<typeof createAdminClient>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabaseAdmin: any,
   userData: CreateUserData
 ): Promise<{ success: boolean; userId?: string; error?: string; wasExisting?: boolean }> {
   const { cedula, full_name, email, phone, address, city, role } = userData
@@ -522,7 +523,9 @@ export async function getAllLoansWithDetails(): Promise<{ data: LoanTableRow[]; 
   if (!invError && investments) {
     investments.forEach(inv => {
       const loanId = inv.loan_id
-      const name = (inv.investor as { full_name: string | null } | null)?.full_name || 'Sin nombre'
+      // Handle Supabase join which may return array or single object
+      const investorData = inv.investor as unknown as { full_name: string | null } | null
+      const name = investorData?.full_name || 'Sin nombre'
       if (!investorsByLoan[loanId]) {
         investorsByLoan[loanId] = []
       }
@@ -539,6 +542,10 @@ export async function getAllLoansWithDetails(): Promise<{ data: LoanTableRow[]; 
     const amountRequested = loan.amount_requested || 0
     const ltv = propertyValue > 0 ? (amountRequested / propertyValue) * 100 : null
 
+    // Cast joined data properly (Supabase returns these as objects for single joins)
+    const ownerData = loan.owner as unknown as { full_name: string | null; document_id: string | null } | null
+    const coDebtorData = loan.co_debtor as unknown as { full_name: string | null } | null
+
     return {
       id: loan.id,
       code: loan.code,
@@ -548,9 +555,9 @@ export async function getAllLoansWithDetails(): Promise<{ data: LoanTableRow[]; 
       interest_rate_nm: loan.interest_rate_nm,
       interest_rate_ea: loan.interest_rate_ea,
       debtor_commission: loan.debtor_commission,
-      debtor_name: (loan.owner as { full_name: string | null } | null)?.full_name || null,
-      debtor_cedula: (loan.owner as { document_id: string | null } | null)?.document_id || null,
-      co_debtor_name: (loan.co_debtor as { full_name: string | null } | null)?.full_name || null,
+      debtor_name: ownerData?.full_name || null,
+      debtor_cedula: ownerData?.document_id || null,
+      co_debtor_name: coDebtorData?.full_name || null,
       property_city: propertyInfo?.city || null,
       property_value: propertyValue || null,
       ltv,
