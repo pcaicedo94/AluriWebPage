@@ -2,7 +2,7 @@ import { createClient } from '../../../../../utils/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft, MapPin, Phone, FileText, CheckCircle, AlertCircle, Receipt } from 'lucide-react'
+import { ArrowLeft, MapPin, Phone, FileText, CheckCircle, TrendingUp, Calendar, Percent, Building } from 'lucide-react'
 
 // Generic property images for display
 const propertyImages = [
@@ -13,27 +13,33 @@ const propertyImages = [
   'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&q=80',
 ]
 
+interface PropertyInfo {
+  address?: string
+  city?: string
+  property_type?: string
+  commercial_value?: number
+}
+
 interface Loan {
   code: string
   status: string
-  interest_rate: number
-  total_amount: number
-  start_date: string
-  term_months: number
-  amortization_type: string | null
-  next_payment_date: string | null
-  next_payment_amount: number | null
-  amount_overdue: number | null
+  interest_rate_ea: number | null
+  amount_requested: number | null
+  amount_funded: number | null
+  term_months: number | null
+  property_info: PropertyInfo | null
+  created_at: string
 }
 
 interface Investment {
   id: string
   amount_invested: number
-  amount_collected: number | null
-  roi_percentage: number
+  interest_rate_investor: number | null
+  status: string
   created_at: string
+  confirmed_at: string | null
   loan_id: string
-  loans: Loan | null
+  loan: Loan | null
 }
 
 // Helper: Format currency as COP
@@ -73,21 +79,20 @@ export default async function InvestmentDetailPage({
     .select(`
       id,
       amount_invested,
-      amount_collected,
-      roi_percentage,
+      interest_rate_investor,
+      status,
       created_at,
+      confirmed_at,
       loan_id,
-      loans (
+      loan:loans!loan_id (
         code,
         status,
-        interest_rate,
-        total_amount,
-        start_date,
+        interest_rate_ea,
+        amount_requested,
+        amount_funded,
         term_months,
-        amortization_type,
-        next_payment_date,
-        next_payment_amount,
-        amount_overdue
+        property_info,
+        created_at
       )
     `)
     .eq('investor_id', user.id)
@@ -99,7 +104,7 @@ export default async function InvestmentDetailPage({
 
   // Find the investment with the matching loan code
   const rawData = (allInvestments as unknown as Investment[])?.find(
-    inv => inv.loans?.code === code
+    inv => inv.loan?.code === code
   )
 
   if (!rawData) {
@@ -107,22 +112,39 @@ export default async function InvestmentDetailPage({
   }
 
   const investment = rawData as unknown as Investment
-  const loan = investment.loans
-  const amountOverdue = Number(loan?.amount_overdue || 0)
-  const isOverdue = amountOverdue > 0
+  const loan = investment.loan
 
   // Calculate values
-  const investedAmount = Number(investment.amount_invested)
-  const roi = Number(investment.roi_percentage)
-  const expectedReturn = investedAmount * (roi / 100)
-  const collectedAmount = Number(investment.amount_collected || 0)
+  const investedAmount = Number(investment.amount_invested || 0)
+  const rate = investment.interest_rate_investor || loan?.interest_rate_ea || 0
+  const termMonths = loan?.term_months || 12
+  const expectedAnnualReturn = investedAmount * (rate / 100)
 
-  // Simulated payment history
-  const paymentHistory = [
-    { date: '15 de Mayo, 2024', type: 'Pago mensual', amount: 2150000 },
-    { date: '15 de Abril, 2024', type: 'Pago mensual', amount: 2150000 },
-    { date: '15 de Marzo, 2024', type: 'Pago mensual', amount: 2150000 },
-  ]
+  // Property info
+  const propertyInfo = loan?.property_info
+  const propertyCity = propertyInfo?.city || 'Colombia'
+  const propertyAddress = propertyInfo?.address || 'Direccion no disponible'
+  const propertyType = propertyInfo?.property_type || 'urbano'
+  const propertyValue = propertyInfo?.commercial_value || 0
+
+  // Loan funding progress
+  const requested = loan?.amount_requested || 0
+  const funded = loan?.amount_funded || 0
+  const fundingProgress = requested > 0 ? (funded / requested) * 100 : 0
+
+  // Status configuration
+  const loanStatus = loan?.status || 'pending'
+  const statusConfig: Record<string, { label: string; bgClass: string; textClass: string }> = {
+    fundraising: { label: 'Fondeando', bgClass: 'bg-amber-500/10', textClass: 'text-amber-400' },
+    active: { label: 'Activo', bgClass: 'bg-emerald-500/10', textClass: 'text-emerald-400' },
+    completed: { label: 'Completado', bgClass: 'bg-blue-500/10', textClass: 'text-blue-400' },
+    defaulted: { label: 'En Mora', bgClass: 'bg-red-500/10', textClass: 'text-red-400' }
+  }
+  const status = statusConfig[loanStatus] || { label: loanStatus, bgClass: 'bg-zinc-500/10', textClass: 'text-zinc-400' }
+
+  // Investment date
+  const investmentDate = investment.confirmed_at || investment.created_at
+  const loanStartDate = loan?.created_at
 
   return (
     <div className="text-white p-8">
@@ -130,18 +152,25 @@ export default async function InvestmentDetailPage({
       <div className="mb-8">
         <Link
           href="/dashboard/inversionista/mis-inversiones"
-          className="inline-flex items-center gap-2 text-zinc-400 hover:text-primary transition-colors mb-4"
+          className="inline-flex items-center gap-2 text-zinc-400 hover:text-teal-400 transition-colors mb-4"
         >
           <ArrowLeft size={20} />
-          <span>Detalle de Hipoteca</span>
+          <span>Volver a Mis Inversiones</span>
         </Link>
 
-        <p className="text-primary text-sm">Resumen de Hipoteca</p>
-        <h1 className="text-2xl font-bold text-white mt-1">
-          Hipoteca ID: {loan?.code || 'N/A'}
+        <div className="flex items-center gap-3 mb-2">
+          <span className="px-3 py-1 bg-zinc-800 text-teal-400 text-sm font-mono rounded">
+            {loan?.code || 'N/A'}
+          </span>
+          <span className={`px-3 py-1 rounded text-sm font-medium ${status.bgClass} ${status.textClass}`}>
+            {status.label}
+          </span>
+        </div>
+        <h1 className="text-2xl font-bold text-white mt-2">
+          Detalle de Inversion
         </h1>
         <p className="text-zinc-500 text-sm mt-1">
-          Credito respaldado por hipoteca
+          Credito respaldado por hipoteca en {propertyCity}
         </p>
       </div>
 
@@ -179,105 +208,136 @@ export default async function InvestmentDetailPage({
 
           {/* Investment Performance */}
           <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">Rendimiento de la Inversion</h2>
-              <span className="text-zinc-500 text-sm">Historico</span>
-            </div>
-
-            <p className="text-zinc-500 text-xs uppercase tracking-wider mb-1">Rentabilidad Total (TIR)</p>
-            <p className="text-3xl font-bold text-primary mb-6">{roi}%</p>
-
-            {/* Chart Placeholder */}
-            <div className="h-40 bg-zinc-800/50 rounded-lg flex items-center justify-center mb-6">
-              <span className="text-zinc-500">Grafico de rendimiento</span>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-zinc-500 text-xs">Inversion</p>
-                <p className="text-zinc-400 text-xs">Intereses Ganados</p>
-                <p className="text-primary font-semibold">{formatCOP(collectedAmount)}</p>
-              </div>
-              <div>
-                <p className="text-zinc-500 text-xs">Del</p>
-                <p className="text-zinc-400 text-xs">Capital Recuperado</p>
-                <p className="text-primary font-semibold">{formatCOP(expectedReturn)}</p>
-              </div>
-              <div>
-                <p className="text-zinc-500 text-xs">Al</p>
-                <p className="text-zinc-400 text-xs">Retorno Esperado</p>
-                <p className="text-zinc-400 font-semibold">-</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Payment Status */}
-          <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700">
-            <h2 className="text-lg font-semibold text-white mb-4">Estado de Cobranza</h2>
-            <div className={`flex items-center gap-3 p-4 rounded-lg ${
-              isOverdue ? 'bg-orange-500/10' : 'bg-primary/10'
-            }`}>
-              {isOverdue ? (
-                <AlertCircle className="text-orange-400" size={24} />
-              ) : (
-                <CheckCircle className="text-primary" size={24} />
-              )}
-              <span className={isOverdue ? 'text-orange-400' : 'text-primary'}>
-                {isOverdue ? 'En mora' : 'Al corriente'}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-white">Mi Inversion</h2>
+              <span className={`px-3 py-1 rounded text-sm font-medium ${status.bgClass} ${status.textClass}`}>
+                {status.label}
               </span>
             </div>
-          </div>
 
-          {/* Next Payment */}
-          <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700">
-            <h2 className="text-lg font-semibold text-white mb-4">Proximo Pago</h2>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-zinc-500 text-xs">Fecha de vencimiento</p>
-                <p className="text-white font-medium">{formatDate(loan?.next_payment_date || null)}</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+              <div className="text-center p-4 bg-zinc-800/50 rounded-xl">
+                <p className="text-zinc-500 text-xs uppercase tracking-wider mb-2">Monto Invertido</p>
+                <p className="text-2xl font-bold text-white">{formatCOP(investedAmount)}</p>
               </div>
-              <div className="text-right">
-                <p className="text-zinc-500 text-xs">Monto</p>
-                <p className="text-primary font-semibold text-lg">
-                  {loan?.next_payment_amount ? formatCOP(Number(loan.next_payment_amount)) : 'N/A'}
-                </p>
+              <div className="text-center p-4 bg-zinc-800/50 rounded-xl">
+                <p className="text-zinc-500 text-xs uppercase tracking-wider mb-2">Tasa E.A.</p>
+                <p className="text-2xl font-bold text-teal-400">{rate.toFixed(1)}%</p>
+              </div>
+              <div className="text-center p-4 bg-zinc-800/50 rounded-xl">
+                <p className="text-zinc-500 text-xs uppercase tracking-wider mb-2">Plazo</p>
+                <p className="text-2xl font-bold text-white">{termMonths} <span className="text-sm font-normal text-zinc-500">meses</span></p>
+              </div>
+              <div className="text-center p-4 bg-zinc-800/50 rounded-xl">
+                <p className="text-zinc-500 text-xs uppercase tracking-wider mb-2">Retorno Esperado</p>
+                <p className="text-2xl font-bold text-emerald-400">{formatCOP(expectedAnnualReturn)}</p>
+              </div>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mt-6">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-zinc-400">Progreso del credito</span>
+                <span className="text-sm text-zinc-400">{fundingProgress.toFixed(0)}% fondeado</span>
+              </div>
+              <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    fundingProgress >= 100 ? 'bg-emerald-500' : 'bg-teal-500'
+                  }`}
+                  style={{ width: `${Math.min(100, fundingProgress)}%` }}
+                />
+              </div>
+              <div className="flex justify-between mt-2 text-xs text-zinc-500">
+                <span>Recaudado: {formatCOP(funded)}</span>
+                <span>Meta: {formatCOP(requested)}</span>
               </div>
             </div>
           </div>
 
-          {/* Payment History */}
+          {/* Property Details */}
           <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700">
-            <h2 className="text-lg font-semibold text-white mb-4">Historial de Pagos</h2>
-            <div className="space-y-4">
-              {paymentHistory.map((payment, index) => (
-                <div key={index} className="flex items-center justify-between py-3 border-b border-zinc-800 last:border-0">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-zinc-800 rounded-lg">
-                      <Receipt size={16} className="text-zinc-400" />
-                    </div>
-                    <div>
-                      <p className="text-white text-sm">{payment.date}</p>
-                      <p className="text-zinc-500 text-xs">{payment.type}</p>
-                    </div>
-                  </div>
-                  <p className="text-white font-medium">{formatCOP(payment.amount)}</p>
+            <h2 className="text-lg font-semibold text-white mb-4">Detalles del Inmueble</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-zinc-800/50 rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin size={16} className="text-teal-400" />
+                  <span className="text-xs text-zinc-500 uppercase">Ubicacion</span>
                 </div>
-              ))}
+                <p className="text-white font-medium">{propertyCity}</p>
+                <p className="text-zinc-500 text-sm">{propertyAddress}</p>
+              </div>
+              <div className="p-4 bg-zinc-800/50 rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <Building size={16} className="text-teal-400" />
+                  <span className="text-xs text-zinc-500 uppercase">Tipo de Predio</span>
+                </div>
+                <p className="text-white font-medium capitalize">{propertyType}</p>
+              </div>
+              {propertyValue > 0 && (
+                <div className="p-4 bg-zinc-800/50 rounded-xl col-span-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp size={16} className="text-teal-400" />
+                    <span className="text-xs text-zinc-500 uppercase">Avaluo Comercial</span>
+                  </div>
+                  <p className="text-white font-medium">{formatCOP(propertyValue)}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Timeline */}
+          <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700">
+            <h2 className="text-lg font-semibold text-white mb-4">Fechas Importantes</h2>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="p-2 bg-teal-500/10 rounded-lg">
+                  <Calendar size={18} className="text-teal-400" />
+                </div>
+                <div>
+                  <p className="text-zinc-500 text-xs">Fecha de Inversion</p>
+                  <p className="text-white font-medium">{formatDate(investmentDate)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="p-2 bg-teal-500/10 rounded-lg">
+                  <Calendar size={18} className="text-teal-400" />
+                </div>
+                <div>
+                  <p className="text-zinc-500 text-xs">Inicio del Credito</p>
+                  <p className="text-white font-medium">{formatDate(loanStartDate || null)}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Right Column - Sidebar */}
         <div className="space-y-6">
-          {/* Location */}
+          {/* Status Card */}
+          <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700">
+            <h3 className="text-sm font-semibold text-white mb-4">Estado del Credito</h3>
+            <div className={`flex items-center gap-3 p-4 rounded-lg ${status.bgClass}`}>
+              <CheckCircle className={status.textClass} size={24} />
+              <div>
+                <span className={`font-medium ${status.textClass}`}>{status.label}</span>
+                <p className="text-zinc-500 text-xs mt-0.5">
+                  {loanStatus === 'active' && 'Credito activo generando rendimientos'}
+                  {loanStatus === 'fundraising' && 'En proceso de recaudacion'}
+                  {loanStatus === 'completed' && 'Credito finalizado exitosamente'}
+                  {loanStatus === 'defaulted' && 'Credito en proceso de recuperacion'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Location Map Placeholder */}
           <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700">
             <h3 className="text-sm font-semibold text-white mb-1">Ubicacion</h3>
-            <p className="text-zinc-500 text-xs mb-4">Colombia</p>
+            <p className="text-zinc-500 text-xs mb-4">{propertyCity}, Colombia</p>
 
-            {/* Map Placeholder */}
             <div className="h-40 bg-zinc-800 rounded-lg flex items-center justify-center mb-4">
-              <MapPin className="text-primary" size={32} />
+              <MapPin className="text-teal-400" size={32} />
             </div>
           </div>
 
@@ -285,7 +345,7 @@ export default async function InvestmentDetailPage({
           <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700">
             <p className="text-zinc-500 text-sm mb-4">Soporte sobre esta inversion</p>
             <div className="space-y-3">
-              <button className="w-full flex items-center justify-center gap-2 bg-primary text-black font-semibold py-3 px-4 rounded-lg hover:bg-primary/90 transition-colors">
+              <button className="w-full flex items-center justify-center gap-2 bg-teal-500 text-white font-semibold py-3 px-4 rounded-lg hover:bg-teal-400 transition-colors">
                 <Phone size={18} />
                 Contactar a Aluri
               </button>
@@ -306,15 +366,21 @@ export default async function InvestmentDetailPage({
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-500 text-sm">Tasa de interes</span>
-                <span className="text-white font-medium">{roi}% E.A.</span>
+                <span className="text-teal-400 font-medium">{rate.toFixed(1)}% E.A.</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-500 text-sm">Plazo</span>
-                <span className="text-white font-medium">{loan?.term_months || 'N/A'} meses</span>
+                <span className="text-white font-medium">{termMonths} meses</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500 text-sm">Fecha inicio</span>
-                <span className="text-white font-medium">{formatDate(loan?.start_date || null)}</span>
+                <span className="text-zinc-500 text-sm">Fecha inversion</span>
+                <span className="text-white font-medium">{formatDate(investmentDate)}</span>
+              </div>
+              <div className="pt-3 border-t border-zinc-800">
+                <div className="flex justify-between">
+                  <span className="text-zinc-500 text-sm">Retorno anual esperado</span>
+                  <span className="text-emerald-400 font-semibold">{formatCOP(expectedAnnualReturn)}</span>
+                </div>
               </div>
             </div>
           </div>

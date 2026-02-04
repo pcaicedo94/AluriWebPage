@@ -2,29 +2,36 @@ import { createClient } from '../../../../utils/supabase/server'
 import { Briefcase } from 'lucide-react'
 import Link from 'next/link'
 import PortfolioChart from '../../../../components/dashboard/PortfolioChart'
+import InvestmentsTabs from './InvestmentsTabs'
 
-// Strictly typed interface with updated loan schema
+// Property info from JSON column
+interface PropertyInfo {
+  address?: string
+  city?: string
+  property_type?: string
+  commercial_value?: number
+}
+
+// Updated interface with correct column names
 interface Loan {
   code: string
   status: string
-  interest_rate: number
-  total_amount: number
-  start_date: string
-  term_months: number
-  amortization_type: string | null
-  next_payment_date: string | null
-  next_payment_amount: number | null
-  amount_overdue: number | null
+  interest_rate_ea: number | null
+  amount_requested: number | null
+  amount_funded: number | null
+  term_months: number | null
+  property_info: PropertyInfo | null
 }
 
 interface Investment {
   id: string
   amount_invested: number
-  amount_collected: number | null
-  roi_percentage: number
+  interest_rate_investor: number | null
+  status: string
   created_at: string
+  confirmed_at: string | null
   loan_id: string
-  loans: Loan | null
+  loan: Loan | null
 }
 
 // Helper: Format currency as COP
@@ -40,33 +47,15 @@ function formatCOP(value: number): string {
 export default async function MisInversionesPage() {
   const supabase = await createClient()
 
-  // User is already verified in layout.tsx
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Fetch investments with updated loan columns
+  // Fetch ALL investments - simplified query without loan.status filters (filter in frontend)
   const { data: rawData, error } = await supabase
     .from('investments')
-    .select(`
-      id,
-      amount_invested,
-      amount_collected,
-      roi_percentage,
-      created_at,
-      loan_id,
-      loans (
-        code,
-        status,
-        interest_rate,
-        total_amount,
-        start_date,
-        term_months,
-        amortization_type,
-        next_payment_date,
-        next_payment_amount,
-        amount_overdue
-      )
-    `)
+    .select('*, loan:loans!inner(*)')
     .eq('investor_id', user?.id)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
 
   if (error) {
     console.error('Error fetching investments:', JSON.stringify(error, null, 2))
@@ -74,21 +63,29 @@ export default async function MisInversionesPage() {
 
   const investments = (rawData || []) as unknown as Investment[]
 
-  // KPI Calculations
-  const cantidadInversiones = investments.length
-  const montoInvertidoTotal = investments.reduce((sum, inv) => sum + Number(inv.amount_invested), 0)
+  // Filter for KPI calculations (only active loan status)
+  const activeInvestments = investments.filter(inv => inv.loan?.status === 'active')
 
+  // KPI Calculations (based on active investments only)
+  const cantidadInversiones = investments.length
+  const cantidadActivas = activeInvestments.length
+  const montoInvertidoTotal = investments.reduce((sum, inv) => sum + Number(inv.amount_invested || 0), 0)
+  const montoActivoTotal = activeInvestments.reduce((sum, inv) => sum + Number(inv.amount_invested || 0), 0)
+
+  // Calculate weighted average rate using interest_rate_investor or loan's interest_rate_ea
   const rentabilidadPromedio = montoInvertidoTotal > 0
-    ? investments.reduce((acc, inv) => acc + (Number(inv.amount_invested) * Number(inv.roi_percentage)), 0) / montoInvertidoTotal
+    ? investments.reduce((acc, inv) => {
+        const rate = inv.interest_rate_investor || inv.loan?.interest_rate_ea || 0
+        return acc + (Number(inv.amount_invested) * Number(rate))
+      }, 0) / montoInvertidoTotal
     : 0
 
-  // Total collected from actual database values
-  const recaudadoTotal = investments.reduce((acc, inv) => {
-    return acc + Number(inv.amount_collected || 0)
-  }, 0)
+  // For now, simulate collected as 15% of expected returns (to be replaced with actual payment tracking)
+  const expectedAnnualReturn = montoActivoTotal * (rentabilidadPromedio / 100)
+  const recaudadoTotal = expectedAnnualReturn * 0.15 // Simulated
 
-  // Capital vigente = Total invertido - Recaudado
-  const capitalVigente = montoInvertidoTotal - recaudadoTotal
+  // Capital vigente = Total invertido activo - Recaudado
+  const capitalVigente = montoActivoTotal - recaudadoTotal
 
   return (
     <div className="text-white p-8">
@@ -106,8 +103,12 @@ export default async function MisInversionesPage() {
           <h2 className="text-xl font-semibold mb-6 text-white">Resumen de Inversiones</h2>
           <div className="space-y-4">
             <div className="flex justify-between items-center py-3 border-b border-zinc-700">
-              <span className="text-zinc-500">Cantidad de Inversiones</span>
+              <span className="text-zinc-500">Total de Inversiones</span>
               <span className="text-2xl font-bold text-white">{cantidadInversiones}</span>
+            </div>
+            <div className="flex justify-between items-center py-3 border-b border-zinc-700">
+              <span className="text-zinc-500">Inversiones Activas</span>
+              <span className="text-2xl font-bold text-teal-400">{cantidadActivas}</span>
             </div>
             <div className="flex justify-between items-center py-3 border-b border-zinc-700">
               <span className="text-zinc-500">Monto Invertido Total</span>
@@ -115,7 +116,7 @@ export default async function MisInversionesPage() {
             </div>
             <div className="flex justify-between items-center py-3 border-b border-zinc-700">
               <span className="text-zinc-500">Rentabilidad Promedio</span>
-              <span className="text-2xl font-bold text-primary">{rentabilidadPromedio.toFixed(2)}% E.A.</span>
+              <span className="text-2xl font-bold text-teal-400">{rentabilidadPromedio.toFixed(2)}% E.A.</span>
             </div>
             <div className="flex justify-between items-center py-3 border-b border-zinc-700">
               <span className="text-zinc-500">Capital Invertido Vigente</span>
@@ -137,77 +138,22 @@ export default async function MisInversionesPage() {
         </div>
       </div>
 
-      {/* Bottom Section: Investment Cards */}
+      {/* Bottom Section: Investment Tabs */}
       <div>
         <h2 className="text-xl font-semibold mb-6 text-white">Detalle de Inversiones</h2>
 
         {investments.length > 0 ? (
-          <div className="space-y-4">
-            {investments.map((inv) => {
-              const loan = inv.loans
-              const amountOverdue = Number(loan?.amount_overdue || 0)
-              const isOverdue = amountOverdue > 0
-
-              // Actual collected amount from database
-              const investedAmount = Number(inv.amount_invested)
-              const collectedForInv = Number(inv.amount_collected || 0)
-
-              // Progress percentage (collected / invested amount)
-              const progressPercent = investedAmount > 0
-                ? Math.min((collectedForInv / investedAmount) * 100, 100)
-                : 0
-
-              return (
-                <Link
-                  key={inv.id}
-                  href={`/dashboard/inversionista/mis-inversiones/${loan?.code || inv.id}`}
-                  className="block bg-zinc-900 p-6 rounded-xl border border-zinc-700 hover:border-zinc-600 hover:bg-zinc-900/80 transition-all cursor-pointer"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold text-white">
-                        Credito #{loan?.code || 'N/A'}
-                      </h3>
-                      <p className="text-zinc-400 text-sm mt-1">
-                        Tu inversion: <span className="text-white font-medium">{formatCOP(investedAmount)}</span>
-                      </p>
-                      <p className={`text-sm mt-1 ${isOverdue ? 'text-orange-400' : 'text-primary'}`}>
-                        Recibido a la fecha: <span className="font-medium">{formatCOP(collectedForInv)}</span>
-                      </p>
-                    </div>
-                    <span
-                      className={`px-3 py-1 rounded text-xs font-medium ${
-                        isOverdue
-                          ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
-                          : 'bg-primary/20 text-primary border border-primary/30'
-                      }`}
-                    >
-                      {isOverdue ? 'En mora' : 'Al día'}
-                    </span>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all duration-500 ${
-                          isOverdue ? 'bg-orange-500' : 'bg-primary'
-                        }`}
-                        style={{ width: `${progressPercent}%` }}
-                      />
-                    </div>
-                    <span className="text-zinc-400 text-sm min-w-[55px] text-right">
-                      {progressPercent.toFixed(2)}%
-                    </span>
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
+          <InvestmentsTabs investments={investments} />
         ) : (
           <div className="flex flex-col items-center justify-center h-64 text-zinc-500 bg-zinc-900 rounded-xl border border-zinc-700">
             <Briefcase size={48} className="mb-4 opacity-50" />
             <p>No se encontraron inversiones.</p>
+            <Link
+              href="/dashboard/inversionista/marketplace"
+              className="mt-4 px-4 py-2 bg-teal-500 hover:bg-teal-400 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              Explorar Marketplace
+            </Link>
           </div>
         )}
       </div>
