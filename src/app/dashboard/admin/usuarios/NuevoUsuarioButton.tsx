@@ -91,6 +91,20 @@ export default function NuevoUsuarioButton() {
                 </div>
 
                 <div>
+                  <label htmlFor="document_id" className="block text-sm font-medium text-slate-300 mb-1">
+                    Cédula / Documento ID
+                  </label>
+                  <input
+                    type="text"
+                    id="document_id"
+                    name="document_id"
+                    required
+                    className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    placeholder="Ej: 10102020"
+                  />
+                </div>
+
+                <div>
                   <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-1">
                     Correo Electronico
                   </label>

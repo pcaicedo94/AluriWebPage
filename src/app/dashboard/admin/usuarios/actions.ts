@@ -16,9 +16,10 @@ export async function crearUsuario(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const fullName = formData.get('fullName') as string
+  const documentId = formData.get('document_id') as string
   const role = formData.get('role') as string
 
-  if (!email || !password || !fullName || !role) {
+  if (!email || !password || !fullName || !documentId || !role) {
     return { error: 'Todos los campos son requeridos' }
   }
 
@@ -31,18 +32,27 @@ export async function crearUsuario(formData: FormData) {
     return { error: 'La contraseña debe tener al menos 6 caracteres' }
   }
 
-  // 1. Create user in Auth system (without trigger metadata to avoid trigger issues)
+  // 1. Create user in Auth system with all metadata for the trigger
   const { data, error } = await supabaseAdmin.auth.admin.createUser({
     email: email,
     password: password,
     email_confirm: true,
     user_metadata: {
-      full_name: fullName
+      full_name: fullName,
+      document_id: documentId,
+      role: role
     }
   })
 
   if (error) {
-    console.error('Error creating auth user:', error.message)
+    console.error('Error creating auth user:', error.message, error.status, error.name)
+    // Provide more user-friendly error messages
+    if (error.message.includes('already registered')) {
+      return { error: 'Este correo ya está registrado.' }
+    }
+    if (error.message.includes('Database error')) {
+      return { error: 'Error de base de datos. Verifica que el trigger de Supabase esté configurado correctamente o deshabilitado.' }
+    }
     return { error: error.message }
   }
 
@@ -62,7 +72,9 @@ export async function crearUsuario(formData: FormData) {
         id: data.user.id,
         email: email,
         full_name: fullName,
-        role: role
+        document_id: documentId,
+        role: role,
+        verification_status: 'pending'
       })
 
     if (profileError) {
@@ -72,10 +84,10 @@ export async function crearUsuario(formData: FormData) {
       return { error: 'Error al crear perfil: ' + profileError.message }
     }
   } else {
-    // Profile exists (created by trigger), update the role
+    // Profile exists (created by trigger), update with all fields
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
-      .update({ role: role, full_name: fullName })
+      .update({ role: role, full_name: fullName, document_id: documentId })
       .eq('id', data.user.id)
 
     if (updateError) {

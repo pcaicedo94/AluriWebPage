@@ -7,13 +7,17 @@ import {
   Users,
   FileText,
   Settings,
-  BarChart3
+  BarChart3,
+  Wallet,
+  HandCoins
 } from 'lucide-react'
 
 const mainNavItems = [
   { href: '/dashboard/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/admin/usuarios', label: 'Usuarios', icon: Users },
   { href: '/dashboard/admin/creditos', label: 'Creditos', icon: FileText },
+  { href: '/dashboard/admin/inversiones', label: 'Tesoreria', icon: Wallet },
+  { href: '/dashboard/admin/colocaciones', label: 'Colocaciones', icon: HandCoins },
   { href: '/dashboard/admin/reportes', label: 'Reportes', icon: BarChart3 },
 ]
 

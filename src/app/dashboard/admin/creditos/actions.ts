@@ -340,3 +340,112 @@ export async function publishLoan(loanId: string): Promise<{ success: boolean; e
 
   return { success: true }
 }
+
+// ========== INVESTMENT APPROVAL ACTIONS ==========
+
+export async function approveInvestment(investmentId: string): Promise<{ success: boolean; error?: string }> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return { success: false, error: 'Configuracion del servidor incompleta.' }
+  }
+
+  const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey)
+
+  // Get the investment details
+  const { data: investment, error: fetchError } = await supabaseAdmin
+    .from('investments')
+    .select('id, status, amount_invested, loan_id')
+    .eq('id', investmentId)
+    .single()
+
+  if (fetchError || !investment) {
+    return { success: false, error: 'Inversion no encontrada.' }
+  }
+
+  if (investment.status !== 'pending_payment') {
+    return { success: false, error: 'Solo se pueden aprobar inversiones en estado pendiente de pago.' }
+  }
+
+  // Update investment status to confirmed
+  const { error: updateError } = await supabaseAdmin
+    .from('investments')
+    .update({
+      status: 'confirmed',
+      confirmed_at: new Date().toISOString()
+    })
+    .eq('id', investmentId)
+
+  if (updateError) {
+    console.error('Error approving investment:', updateError.message)
+    return { success: false, error: 'Error al aprobar la inversion: ' + updateError.message }
+  }
+
+  // Update the loan's amount_funded
+  const { data: loan, error: loanFetchError } = await supabaseAdmin
+    .from('loans')
+    .select('amount_funded')
+    .eq('id', investment.loan_id)
+    .single()
+
+  if (!loanFetchError && loan) {
+    const currentFunded = loan.amount_funded || 0
+    const newFunded = currentFunded + investment.amount_invested
+
+    await supabaseAdmin
+      .from('loans')
+      .update({ amount_funded: newFunded })
+      .eq('id', investment.loan_id)
+  }
+
+  revalidatePath('/dashboard/admin/inversiones')
+  revalidatePath('/dashboard/admin/creditos')
+
+  return { success: true }
+}
+
+export async function rejectInvestment(investmentId: string): Promise<{ success: boolean; error?: string }> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return { success: false, error: 'Configuracion del servidor incompleta.' }
+  }
+
+  const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey)
+
+  // Get the investment details
+  const { data: investment, error: fetchError } = await supabaseAdmin
+    .from('investments')
+    .select('id, status')
+    .eq('id', investmentId)
+    .single()
+
+  if (fetchError || !investment) {
+    return { success: false, error: 'Inversion no encontrada.' }
+  }
+
+  if (investment.status !== 'pending_payment') {
+    return { success: false, error: 'Solo se pueden rechazar inversiones en estado pendiente de pago.' }
+  }
+
+  // Update investment status to rejected
+  const { error: updateError } = await supabaseAdmin
+    .from('investments')
+    .update({
+      status: 'rejected',
+      rejected_at: new Date().toISOString()
+    })
+    .eq('id', investmentId)
+
+  if (updateError) {
+    console.error('Error rejecting investment:', updateError.message)
+    return { success: false, error: 'Error al rechazar la inversion: ' + updateError.message }
+  }
+
+  revalidatePath('/dashboard/admin/inversiones')
+  revalidatePath('/dashboard/admin/creditos')
+
+  return { success: true }
+}
