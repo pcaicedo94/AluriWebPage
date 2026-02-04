@@ -20,6 +20,12 @@ interface PropertyInfo {
   commercial_value?: number
 }
 
+// Payment record from loan_payments table
+interface LoanPayment {
+  amount_capital: number
+  amount_interest: number
+}
+
 interface Loan {
   code: string
   status: string
@@ -29,6 +35,7 @@ interface Loan {
   term_months: number | null
   property_info: PropertyInfo | null
   created_at: string
+  loan_payments: LoanPayment[]
 }
 
 interface Investment {
@@ -73,7 +80,7 @@ export default async function InvestmentDetailPage({
     notFound()
   }
 
-  // Fetch all investments for this user with their loans
+  // Fetch all investments for this user with their loans and payments
   const { data: allInvestments, error } = await supabase
     .from('investments')
     .select(`
@@ -92,7 +99,11 @@ export default async function InvestmentDetailPage({
         amount_funded,
         term_months,
         property_info,
-        created_at
+        created_at,
+        loan_payments (
+          amount_capital,
+          amount_interest
+        )
       )
     `)
     .eq('investor_id', user.id)
@@ -127,10 +138,24 @@ export default async function InvestmentDetailPage({
   const propertyType = propertyInfo?.property_type || 'urbano'
   const propertyValue = propertyInfo?.commercial_value || 0
 
-  // Loan funding progress
+  // Loan funding (for reference)
   const requested = loan?.amount_requested || 0
   const funded = loan?.amount_funded || 0
-  const fundingProgress = requested > 0 ? (funded / requested) * 100 : 0
+
+  // Calculate capital recovery progress from actual payments
+  const participationPercentage = requested > 0 ? investedAmount / requested : 0
+
+  // Sum all payments for this loan
+  const payments = loan?.loan_payments || []
+  const totalLoanCapitalPaid = payments.reduce((sum, p) => sum + (p.amount_capital || 0), 0)
+  const totalLoanInterestPaid = payments.reduce((sum, p) => sum + (p.amount_interest || 0), 0)
+
+  // Pro-rate by investor's share
+  const capitalRecuperado = totalLoanCapitalPaid * participationPercentage
+  const interesesGanados = totalLoanInterestPaid * participationPercentage
+
+  // Progress = capital recovered / amount invested
+  const recoveryProgress = investedAmount > 0 ? (capitalRecuperado / investedAmount) * 100 : 0
 
   // Status configuration
   const loanStatus = loan?.status || 'pending'
@@ -234,25 +259,35 @@ export default async function InvestmentDetailPage({
               </div>
             </div>
 
-            {/* Progress Bar */}
+            {/* Capital Recovery Progress Bar */}
             <div className="mt-6">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-zinc-400">Progreso del credito</span>
-                <span className="text-sm text-zinc-400">{fundingProgress.toFixed(0)}% fondeado</span>
+                <span className="text-sm text-zinc-400">Capital Recuperado</span>
+                <span className="text-sm text-zinc-400">{recoveryProgress.toFixed(0)}% recuperado</span>
               </div>
               <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all ${
-                    fundingProgress >= 100 ? 'bg-emerald-500' : 'bg-teal-500'
+                    recoveryProgress >= 100 ? 'bg-emerald-500' : 'bg-teal-500'
                   }`}
-                  style={{ width: `${Math.min(100, fundingProgress)}%` }}
+                  style={{ width: `${Math.min(100, recoveryProgress)}%` }}
                 />
               </div>
               <div className="flex justify-between mt-2 text-xs text-zinc-500">
-                <span>Recaudado: {formatCOP(funded)}</span>
-                <span>Meta: {formatCOP(requested)}</span>
+                <span>Recibido: {formatCOP(capitalRecuperado)}</span>
+                <span>Meta: {formatCOP(investedAmount)}</span>
               </div>
             </div>
+
+            {/* Earnings Section */}
+            {interesesGanados > 0 && (
+              <div className="mt-4 p-4 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                <div className="flex justify-between items-center">
+                  <span className="text-amber-400 font-medium">Intereses Ganados</span>
+                  <span className="text-amber-400 font-bold text-lg">{formatCOP(interesesGanados)}</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Property Details */}
@@ -376,9 +411,21 @@ export default async function InvestmentDetailPage({
                 <span className="text-zinc-500 text-sm">Fecha inversion</span>
                 <span className="text-white font-medium">{formatDate(investmentDate)}</span>
               </div>
-              <div className="pt-3 border-t border-zinc-800">
+              <div className="flex justify-between">
+                <span className="text-zinc-500 text-sm">Participacion</span>
+                <span className="text-white font-medium">{(participationPercentage * 100).toFixed(1)}%</span>
+              </div>
+              <div className="pt-3 border-t border-zinc-800 space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-zinc-500 text-sm">Retorno anual esperado</span>
+                  <span className="text-zinc-500 text-sm">Capital recuperado</span>
+                  <span className="text-blue-400 font-medium">{formatCOP(capitalRecuperado)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-500 text-sm">Intereses ganados</span>
+                  <span className="text-amber-400 font-medium">{formatCOP(interesesGanados)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-500 text-sm">Retorno esperado anual</span>
                   <span className="text-emerald-400 font-semibold">{formatCOP(expectedAnnualReturn)}</span>
                 </div>
               </div>
