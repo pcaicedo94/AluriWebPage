@@ -80,8 +80,8 @@ export default async function InvestmentDetailPage({
     notFound()
   }
 
-  // Fetch all investments for this user with their loans and payments
-  const { data: allInvestments, error } = await supabase
+  // Fetch investment by loan code using !inner join to filter directly
+  const { data: investments, error } = await supabase
     .from('investments')
     .select(`
       id,
@@ -91,7 +91,7 @@ export default async function InvestmentDetailPage({
       created_at,
       confirmed_at,
       loan_id,
-      loan:loans!loan_id (
+      loan:loans!inner (
         code,
         status,
         interest_rate_ea,
@@ -107,16 +107,15 @@ export default async function InvestmentDetailPage({
       )
     `)
     .eq('investor_id', user.id)
+    .eq('loan.code', code)
 
   if (error) {
-    console.error('Error fetching investments:', error.message)
+    console.error('Error fetching investment:', error.message)
     notFound()
   }
 
-  // Find the investment with the matching loan code
-  const rawData = (allInvestments as unknown as Investment[])?.find(
-    inv => inv.loan?.code === code
-  )
+  // Get first matching investment (should be unique per user+loan)
+  const rawData = investments?.[0]
 
   if (!rawData) {
     notFound()

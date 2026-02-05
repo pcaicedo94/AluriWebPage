@@ -60,12 +60,12 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
               className="inline-flex items-center gap-2 text-gray-500 hover:text-white transition-colors text-sm"
             >
               <ArrowLeft size={16} />
-              <span>Opportunities</span>
+              <span>Oportunidades</span>
             </Link>
 
             <div className="flex items-center gap-3">
               <span className="px-3 py-1.5 bg-cyan-500/10 text-cyan-400 text-xs font-semibold rounded-full border border-cyan-500/30">
-                OPEN FOR FUNDING
+                ABIERTO PARA FONDEO
               </span>
               <span className="px-3 py-1.5 bg-white/5 text-gray-400 text-xs font-mono rounded-lg border border-white/10">
                 ID: {loan.code}
@@ -123,7 +123,7 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
                 {getPropertyTitle()} {getPropertySubtitle()}
               </h1>
               <p className="text-gray-500 text-sm leading-relaxed">
-                First-lien mortgage opportunity secured by a prime residential property undergoing renovation in the northern district. Capital will be used to finalize interior finishes and landscape improvements.
+                Oportunidad de hipoteca de primer grado respaldada por una propiedad residencial premium en proceso de renovación. El capital se utilizará para finalizar acabados interiores y mejoras de paisajismo.
               </p>
             </div>
 
@@ -138,7 +138,7 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
             {/* Location Section */}
             <div className="bg-[#111] border border-white/5 rounded-2xl overflow-hidden">
               <div className="p-4 border-b border-white/5 flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-white tracking-wide">Location</h2>
+                <h2 className="text-sm font-semibold text-white tracking-wide">Ubicación</h2>
                 <span className="text-gray-500 text-sm">{loan.property_info?.city || 'Medellín'}, CO</span>
               </div>
               <div className="h-48 bg-[#0d0d0d] flex items-center justify-center relative">
@@ -146,7 +146,7 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
                   <div className="w-12 h-12 bg-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-2 border border-cyan-500/30">
                     <MapPin size={20} className="text-cyan-400" />
                   </div>
-                  <p className="text-gray-500 text-sm">{loan.property_info?.address || 'Verified Address'}</p>
+                  <p className="text-gray-500 text-sm">{loan.property_info?.address || 'Dirección Verificada'}</p>
                 </div>
                 {/* Map grid overlay */}
                 <div className="absolute inset-0 opacity-[0.03]" style={{
@@ -167,15 +167,15 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
             <div className="flex items-center gap-6 py-4">
               <div className="flex items-center gap-2">
                 <CheckCircle2 size={18} className="text-cyan-400" />
-                <span className="text-gray-400 text-sm">Verified Collateral</span>
+                <span className="text-gray-400 text-sm">Garantía Verificada</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 size={18} className="text-cyan-400" />
-                <span className="text-gray-400 text-sm">Clean Title</span>
+                <span className="text-gray-400 text-sm">Título Limpio</span>
               </div>
               <div className="flex items-center gap-2">
                 <Building2 size={18} className="text-cyan-400" />
-                <span className="text-gray-400 text-sm">{loan.property_info?.property_type || 'Residential'}</span>
+                <span className="text-gray-400 text-sm">{loan.property_info?.property_type || 'Residencial'}</span>
               </div>
             </div>
           </div>

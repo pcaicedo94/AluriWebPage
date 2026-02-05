@@ -26,10 +26,10 @@ export default function BentoMetrics({
   // Parse LTV number for color coding
   const ltvNumber = parseFloat(ltv.replace('%', '')) || 0
   const getLtvStatus = () => {
-    if (ltvNumber <= 40) return { label: 'Very Safe', color: 'text-emerald-400' }
-    if (ltvNumber <= 55) return { label: 'Safe', color: 'text-teal-400' }
-    if (ltvNumber <= 70) return { label: 'Moderate', color: 'text-amber-400' }
-    return { label: 'High', color: 'text-red-400' }
+    if (ltvNumber <= 40) return { label: 'Muy Seguro', color: 'text-emerald-400' }
+    if (ltvNumber <= 55) return { label: 'Seguro', color: 'text-teal-400' }
+    if (ltvNumber <= 70) return { label: 'Moderado', color: 'text-amber-400' }
+    return { label: 'Alto', color: 'text-red-400' }
   }
 
   const ltvStatus = getLtvStatus()

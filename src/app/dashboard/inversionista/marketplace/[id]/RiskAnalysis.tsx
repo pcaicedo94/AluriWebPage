@@ -34,10 +34,10 @@ export default function RiskAnalysis({ ltv, propertyType, city }: RiskAnalysisPr
 
   // Determine risk level
   const getRiskLevel = () => {
-    if (riskScore >= 85) return { label: 'Low Risk', color: 'text-emerald-400', borderColor: 'border-emerald-500/50', bgColor: 'bg-emerald-500/10' }
-    if (riskScore >= 70) return { label: 'Moderate', color: 'text-teal-400', borderColor: 'border-teal-500/50', bgColor: 'bg-teal-500/10' }
-    if (riskScore >= 55) return { label: 'Medium', color: 'text-amber-400', borderColor: 'border-amber-500/50', bgColor: 'bg-amber-500/10' }
-    return { label: 'High Risk', color: 'text-red-400', borderColor: 'border-red-500/50', bgColor: 'bg-red-500/10' }
+    if (riskScore >= 85) return { label: 'Riesgo Bajo', color: 'text-emerald-400', borderColor: 'border-emerald-500/50', bgColor: 'bg-emerald-500/10' }
+    if (riskScore >= 70) return { label: 'Moderado', color: 'text-teal-400', borderColor: 'border-teal-500/50', bgColor: 'bg-teal-500/10' }
+    if (riskScore >= 55) return { label: 'Medio', color: 'text-amber-400', borderColor: 'border-amber-500/50', bgColor: 'bg-amber-500/10' }
+    return { label: 'Riesgo Alto', color: 'text-red-400', borderColor: 'border-red-500/50', bgColor: 'bg-red-500/10' }
   }
 
   const riskLevel = getRiskLevel()
@@ -51,9 +51,9 @@ export default function RiskAnalysis({ ltv, propertyType, city }: RiskAnalysisPr
   const ltvMultiple = ltv > 0 ? (100 / ltv).toFixed(2) : '0'
 
   const analysisPoints = [
-    `Asset valuation exceeds loan request by ${ltvMultiple}x.`,
-    'Borrower credit history shows consistent repayment patterns over 5 years.',
-    'Renovation plans are verified by third-party architect audit.'
+    `El avalúo del activo supera la solicitud de préstamo por ${ltvMultiple}x.`,
+    'El historial crediticio del prestatario muestra patrones de pago consistentes en los últimos 5 años.',
+    'Los planes de remodelación están verificados por auditoría de arquitecto externo.'
   ]
 
   return (
@@ -64,7 +64,7 @@ export default function RiskAnalysis({ ltv, propertyType, city }: RiskAnalysisPr
           <div className="p-2 bg-teal-500/10 rounded-xl border border-teal-500/20">
             <Sparkles size={20} className="text-teal-400" />
           </div>
-          <h3 className="text-lg font-bold text-white tracking-tight">Aluri AI Risk Analysis</h3>
+          <h3 className="text-lg font-bold text-white tracking-tight">Análisis de Riesgo Aluri AI</h3>
         </div>
 
         {/* Risk Badge */}
@@ -110,7 +110,7 @@ export default function RiskAnalysis({ ltv, propertyType, city }: RiskAnalysisPr
           {/* Center text */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-3xl font-bold text-white">{riskScore}</span>
-            <span className="text-gray-600 text-xs uppercase tracking-wider">Score</span>
+            <span className="text-gray-600 text-xs uppercase tracking-wider">Puntuación</span>
           </div>
         </div>
 
@@ -129,11 +129,11 @@ export default function RiskAnalysis({ ltv, propertyType, city }: RiskAnalysisPr
       <div className="mt-6 pt-5 border-t border-white/5 flex items-center gap-4">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 bg-teal-400 rounded-full"></div>
-          <span className="text-gray-500 text-xs">Verified Collateral</span>
+          <span className="text-gray-500 text-xs">Garantía Verificada</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 bg-teal-400 rounded-full"></div>
-          <span className="text-gray-500 text-xs">Clean Title</span>
+          <span className="text-gray-500 text-xs">Título Limpio</span>
         </div>
       </div>
     </div>

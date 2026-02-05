@@ -1,84 +1,92 @@
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { updateSession } from './utils/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-  const { supabase, user, supabaseResponse } = await updateSession(request)
-  const { pathname } = request.nextUrl
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  })
 
-  // ============================================
-  // ADMIN ROUTE PROTECTION
-  // ============================================
-  if (pathname.startsWith('/dashboard/admin')) {
-    // No user logged in -> redirect to login
-    if (!user) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          request.cookies.set({
+            name,
+            value,
+            ...options,
+          })
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          })
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          })
+        },
+        remove(name: string, options: CookieOptions) {
+          request.cookies.set({
+            name,
+            value: '',
+            ...options,
+          })
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          })
+          response.cookies.set({
+            name,
+            value: '',
+            ...options,
+          })
+        },
+      },
     }
+  )
 
-    // Fetch user role from profiles table
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
+  // 1. Verificar sesión
+  const { data: { user } } = await supabase.auth.getUser()
 
-    if (error) {
-      console.error('Error fetching user role:', error.message)
-      // On error, redirect to safe location
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
-    }
-
-    // Check if user has admin role
-    if (profile?.role !== 'admin') {
-      // Not an admin -> redirect to investor dashboard
-      const url = request.nextUrl.clone()
-      url.pathname = '/dashboard/inversionista'
-      return NextResponse.redirect(url)
-    }
-
-    // User is admin -> allow access
-    return supabaseResponse
+  // 2. Si no está logueado y quiere entrar al dashboard, mandar al login
+  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // ============================================
-  // INVERSIONISTA ROUTE PROTECTION
-  // ============================================
-  if (pathname.startsWith('/dashboard/inversionista')) {
-    if (!user) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
+  // 3. CONTROL DE ROLES (Aquí evitamos la confusión)
+  if (user) {
+    // Obtenemos el rol desde los metadatos del usuario
+    // (Asegúrate de guardar el rol en user_metadata al registrarse)
+    const role = user.user_metadata.role || 'investor';
+
+    // REGLA: El Admin NO debe estar en rutas de Inversionista
+    if (role === 'admin' && request.nextUrl.pathname.startsWith('/dashboard/inversionista')) {
+       return NextResponse.redirect(new URL('/dashboard/admin/colocaciones', request.url))
     }
-    return supabaseResponse
+
+    // REGLA: El Inversionista NO debe estar en rutas de Admin
+    if (role !== 'admin' && request.nextUrl.pathname.startsWith('/dashboard/admin')) {
+       return NextResponse.redirect(new URL('/dashboard/inversionista', request.url))
+    }
   }
 
-  // ============================================
-  // PROPIETARIO ROUTE PROTECTION
-  // ============================================
-  if (pathname.startsWith('/dashboard/propietario')) {
-    if (!user) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
-    }
-    return supabaseResponse
-  }
-
-  return supabaseResponse
+  return response
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
+    '/dashboard/:path*',
+    '/login',
+    // Excluir archivos estáticos e imágenes
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

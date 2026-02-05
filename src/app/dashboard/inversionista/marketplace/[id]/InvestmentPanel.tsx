@@ -116,7 +116,7 @@ export default function InvestmentPanel({
     <div className="bg-[#111] border border-white/10 rounded-2xl overflow-hidden sticky top-6">
       {/* Header */}
       <div className="p-5 border-b border-white/10">
-        <h3 className="text-xl font-bold text-white tracking-tight">Invest Now</h3>
+        <h3 className="text-xl font-bold text-white tracking-tight">Invertir Ahora</h3>
       </div>
 
       <div className="p-5">
@@ -221,7 +221,7 @@ export default function InvestmentPanel({
         {/* Disclaimer */}
         <div className="mt-5 pt-5 border-t border-white/5">
           <p className="text-gray-600 text-xs leading-relaxed">
-            By clicking confirm, you agree to the Terms of Service and Risk Disclosure Statement for Mortgage Investment #{loanId.slice(0, 4)}.
+            Al confirmar, aceptas los Términos de Servicio y la Declaración de Riesgos para Inversiones Hipotecarias #{loanId.slice(0, 4)}.
           </p>
         </div>
 
@@ -230,7 +230,7 @@ export default function InvestmentPanel({
           <div className="flex items-start gap-2">
             <Info size={14} className="text-gray-500 mt-0.5 flex-shrink-0" />
             <p className="text-gray-500 text-xs">
-              Funds are held in escrow until the total amount is reached. If not funded within 14 days, your investment is returned in full.
+              Los fondos se mantienen en custodia hasta alcanzar el monto total. Si no se completa el fondeo en 14 días, tu inversión se devuelve en su totalidad.
             </p>
           </div>
         </div>
