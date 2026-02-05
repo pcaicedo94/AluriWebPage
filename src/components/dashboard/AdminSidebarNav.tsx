@@ -14,7 +14,6 @@ import {
 const mainNavItems = [
   { href: '/dashboard/admin', label: 'Panel', icon: LayoutDashboard },
   { href: '/dashboard/admin/usuarios', label: 'Usuarios', icon: Users },
-  { href: '/dashboard/admin/creditos', label: 'Creditos', icon: FileText },
   { href: '/dashboard/admin/inversiones', label: 'Tesoreria', icon: Wallet },
   { href: '/dashboard/admin/colocaciones', label: 'Colocaciones', icon: HandCoins },
 ]
