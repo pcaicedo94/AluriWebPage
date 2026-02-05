@@ -1,6 +1,56 @@
 import { Users, FileText, TrendingUp, AlertCircle } from 'lucide-react'
+import { createClient } from '../../../utils/supabase/server'
 
-export default function AdminDashboard() {
+// Helper para formatear moneda
+function formatCOP(value: number): string {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value)
+}
+
+export default async function AdminDashboard() {
+  const supabase = await createClient()
+
+  // 1. Usuarios Totales
+  const { count: totalUsers } = await supabase
+    .from('profiles')
+    .select('*', { count: 'exact', head: true })
+
+  // 2. Créditos Activos (status = 'active' o 'fundraising')
+  const { count: activeLoans } = await supabase
+    .from('loans')
+    .select('*', { count: 'exact', head: true })
+    .in('status', ['active', 'fundraising'])
+
+  // 3. Capital Total (suma de amount_funded de todos los loans)
+  const { data: loansData } = await supabase
+    .from('loans')
+    .select('amount_funded')
+
+  const totalCapital = loansData?.reduce((sum, loan) => sum + (loan.amount_funded || 0), 0) || 0
+
+  // 4. Créditos En Mora (status = 'defaulted')
+  const { count: defaultedLoans } = await supabase
+    .from('loans')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'defaulted')
+
+  // 5. Actividad Reciente - últimas inversiones
+  const { data: recentInvestments } = await supabase
+    .from('investments')
+    .select(`
+      id,
+      amount_invested,
+      created_at,
+      investor:profiles!investor_id (full_name, email),
+      loan:loans!loan_id (code, property_info)
+    `)
+    .order('created_at', { ascending: false })
+    .limit(5)
+
   return (
     <div className="text-white p-8">
       <header className="mb-8 border-b border-slate-800 pb-6">
@@ -19,7 +69,7 @@ export default function AdminDashboard() {
             </div>
             <span className="text-slate-400 text-sm">Usuarios Totales</span>
           </div>
-          <p className="text-3xl font-bold text-white">--</p>
+          <p className="text-3xl font-bold text-white">{totalUsers ?? 0}</p>
         </div>
 
         <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
@@ -29,7 +79,7 @@ export default function AdminDashboard() {
             </div>
             <span className="text-slate-400 text-sm">Creditos Activos</span>
           </div>
-          <p className="text-3xl font-bold text-white">--</p>
+          <p className="text-3xl font-bold text-white">{activeLoans ?? 0}</p>
         </div>
 
         <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
@@ -39,7 +89,7 @@ export default function AdminDashboard() {
             </div>
             <span className="text-slate-400 text-sm">Capital Total</span>
           </div>
-          <p className="text-3xl font-bold text-white">--</p>
+          <p className="text-2xl font-bold text-white">{formatCOP(totalCapital)}</p>
         </div>
 
         <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
@@ -49,16 +99,54 @@ export default function AdminDashboard() {
             </div>
             <span className="text-slate-400 text-sm">En Mora</span>
           </div>
-          <p className="text-3xl font-bold text-white">--</p>
+          <p className="text-3xl font-bold text-white">{defaultedLoans ?? 0}</p>
         </div>
       </div>
 
-      {/* Placeholder Content */}
+      {/* Actividad Reciente */}
       <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
         <h2 className="text-xl font-semibold mb-6">Actividad Reciente</h2>
-        <div className="flex flex-col items-center justify-center h-48 text-slate-400">
-          <p>Proximamente: Dashboard con metricas en tiempo real</p>
-        </div>
+        {recentInvestments && recentInvestments.length > 0 ? (
+          <div className="space-y-4">
+            {recentInvestments.map((investment) => {
+              const investor = investment.investor as { full_name: string; email: string } | null
+              const loan = investment.loan as { code: string; property_info: { city?: string } | null } | null
+
+              return (
+                <div key={investment.id} className="flex items-center justify-between p-4 bg-slate-700/50 rounded-xl">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center">
+                      <TrendingUp size={18} className="text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="text-white font-medium">
+                        {investor?.full_name || investor?.email || 'Usuario'}
+                      </p>
+                      <p className="text-slate-400 text-sm">
+                        Invirtió en {loan?.code || 'Crédito'}
+                        {loan?.property_info?.city ? ` - ${loan.property_info.city}` : ''}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-emerald-400 font-bold">{formatCOP(investment.amount_invested)}</p>
+                    <p className="text-slate-500 text-xs">
+                      {new Date(investment.created_at).toLocaleDateString('es-CO', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-48 text-slate-400">
+            <p>No hay actividad reciente</p>
+          </div>
+        )}
       </div>
     </div>
   )
