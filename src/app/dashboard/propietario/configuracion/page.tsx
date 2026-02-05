@@ -1,0 +1,42 @@
+import { Settings, ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
+import { getProfile } from './actions'
+import ConfigForm from './ConfigForm'
+import { redirect } from 'next/navigation'
+
+export default async function ConfiguracionPage() {
+  const result = await getProfile()
+
+  if (result.error) {
+    redirect('/login')
+  }
+
+  return (
+    <div className="p-6 lg:p-8 space-y-8">
+      {/* Header */}
+      <header>
+        <Link
+          href="/dashboard/propietario"
+          className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors mb-4"
+        >
+          <ArrowLeft size={16} />
+          <span>Volver al Panel</span>
+        </Link>
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gray-100 rounded-xl">
+            <Settings size={24} className="text-gray-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Configuracion</h1>
+            <p className="text-gray-500 text-sm mt-0.5">
+              Administra tu perfil y seguridad
+            </p>
+          </div>
+        </div>
+      </header>
+
+      {/* Form */}
+      <ConfigForm initialData={result.data!} />
+    </div>
+  )
+}
