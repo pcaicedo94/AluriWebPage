@@ -14,25 +14,41 @@ export async function POST(request: NextRequest) {
           return cookieStore.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
-          cookieStore.set({ name, value, ...options })
+          try {
+            cookieStore.set({ name, value, ...options })
+          } catch {
+            // Handle cookie setting in edge cases
+          }
         },
         remove(name: string, options: CookieOptions) {
-          cookieStore.set({ name, value: '', ...options })
+          try {
+            cookieStore.set({ name, value: '', ...options })
+          } catch {
+            // Handle cookie removal in edge cases
+          }
         },
       },
     }
   )
 
-  // Verificamos si hay sesión y obtenemos el rol antes de cerrar
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  // Sign out the user
+  await supabase.auth.signOut()
 
-  // Always sign out and redirect to unified login page
-  if (session) {
-    await supabase.auth.signOut()
-  }
-  return NextResponse.redirect(new URL('/login', request.url), {
+  // Create response that redirects to login
+  const response = NextResponse.redirect(new URL('/login', request.url), {
     status: 302,
   })
+
+  // Clear all Supabase auth cookies
+  const allCookies = cookieStore.getAll()
+  for (const cookie of allCookies) {
+    if (cookie.name.includes('supabase') || cookie.name.includes('sb-')) {
+      response.cookies.set(cookie.name, '', {
+        expires: new Date(0),
+        path: '/',
+      })
+    }
+  }
+
+  return response
 }

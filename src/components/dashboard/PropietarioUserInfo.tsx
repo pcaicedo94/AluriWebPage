@@ -1,4 +1,8 @@
+'use client'
+
 import { LogOut } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 interface PropietarioUserInfoProps {
   name: string
@@ -6,12 +10,33 @@ interface PropietarioUserInfoProps {
 }
 
 export default function PropietarioUserInfo({ name, email }: PropietarioUserInfoProps) {
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
+
   const initials = name
     .split(' ')
     .map((n) => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2)
+
+  const handleSignOut = async () => {
+    setIsLoading(true)
+    try {
+      const response = await fetch('/auth/signout', {
+        method: 'POST',
+      })
+      if (response.redirected) {
+        router.push('/login')
+      } else {
+        router.push('/login')
+      }
+      router.refresh()
+    } catch (error) {
+      console.error('Error signing out:', error)
+      router.push('/login')
+    }
+  }
 
   return (
     <div className="p-4 border-t border-gray-200 mt-auto">
@@ -25,15 +50,14 @@ export default function PropietarioUserInfo({ name, email }: PropietarioUserInfo
         </div>
       </div>
 
-      <form action="/auth/signout" method="post" className="mt-4">
-        <button
-          type="submit"
-          className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <LogOut size={18} />
-          <span>Cerrar Sesion</span>
-        </button>
-      </form>
+      <button
+        onClick={handleSignOut}
+        disabled={isLoading}
+        className="flex items-center gap-2 w-full px-4 py-2 mt-4 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+      >
+        <LogOut size={18} />
+        <span>{isLoading ? 'Cerrando...' : 'Cerrar Sesion'}</span>
+      </button>
     </div>
   )
 }

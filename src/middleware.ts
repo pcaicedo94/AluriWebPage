@@ -1,103 +1,86 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { updateSession } from './utils/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
+  const pathname = request.nextUrl.pathname
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-        },
-      },
-    }
-  )
-
-  // Verificar sesión
-  const { data: { user } } = await supabase.auth.getUser()
-
-  // Si no está logueado y quiere entrar al dashboard, mandar al login
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  // ===============================================
+  // RUTAS EXCLUIDAS DEL MIDDLEWARE
+  // ===============================================
+  // Las rutas de autenticación NO deben ser interceptadas
+  const isAuthRoute = pathname.startsWith('/auth/')
+  if (isAuthRoute) {
+    // Permitir que las rutas de auth funcionen sin interferencia
+    const { supabaseResponse } = await updateSession(request)
+    return supabaseResponse
   }
 
-  // Si está logueado, verificar el rol y redirigir al dashboard apropiado
-  if (user) {
+  // ===============================================
+  // ACTUALIZAR SESIÓN DE SUPABASE
+  // ===============================================
+  const { supabase, user, supabaseResponse } = await updateSession(request)
+
+  // ===============================================
+  // DEFINIR RUTAS PROTEGIDAS (WHITELIST)
+  // ===============================================
+  // Una ruta es protegida SOLO si comienza con /dashboard
+  const isProtectedRoute = pathname.startsWith('/dashboard')
+
+  // ===============================================
+  // CASO 1: Usuario SIN sesión intenta acceder a ruta protegida
+  // ===============================================
+  if (isProtectedRoute && !user) {
+    const redirectUrl = new URL('/login', request.url)
+    return NextResponse.redirect(redirectUrl)
+  }
+
+  // ===============================================
+  // CASO 2: Usuario CON sesión en ruta protegida -> validar rol
+  // ===============================================
+  if (isProtectedRoute && user) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single()
 
-    if (profile?.role) {
-      const currentPath = request.nextUrl.pathname
-      
-      // Si es propietario y no está en su dashboard, redirigir
-      if (profile.role === 'propietario' && !currentPath.startsWith('/dashboard/propietario')) {
-        return NextResponse.redirect(new URL('/dashboard/propietario', request.url))
+    const role = profile?.role
+
+    // Solo redirigir si hay un rol válido y el usuario está en un dashboard incorrecto
+    if (role) {
+      const isInCorrectDashboard = pathname.startsWith(`/dashboard/${role}`)
+      const isExactDashboard = pathname === '/dashboard'
+
+      // Si está en /dashboard exacto, redirigir a su dashboard correspondiente
+      if (isExactDashboard) {
+        return NextResponse.redirect(new URL(`/dashboard/${role}`, request.url))
       }
-      
-      // Si es inversionista y no está en su dashboard, redirigir
-      if (profile.role === 'inversionista' && !currentPath.startsWith('/dashboard/inversionista')) {
-        return NextResponse.redirect(new URL('/dashboard/inversionista', request.url))
-      }
-      
-      // Si es admin y no está en su dashboard, redirigir
-      if (profile.role === 'admin' && !currentPath.startsWith('/dashboard/admin')) {
-        return NextResponse.redirect(new URL('/dashboard/admin', request.url))
+
+      // Si está en un dashboard que NO le corresponde, redirigir al suyo
+      if (!isInCorrectDashboard) {
+        return NextResponse.redirect(new URL(`/dashboard/${role}`, request.url))
       }
     }
   }
 
-  return response
+  // ===============================================
+  // CASO 3: Rutas públicas (/, /login, etc.)
+  // ===============================================
+  // NO REDIRIGIR. El usuario puede estar logueado y navegar libremente
+  // por páginas públicas como la landing page.
+
+  return supabaseResponse
 }
 
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/login',
-    // Excluir archivos estáticos e imágenes
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - Images (svg, png, jpg, jpeg, gif, webp)
+     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
