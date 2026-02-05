@@ -62,6 +62,34 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
+  // Si está logueado, verificar el rol y redirigir al dashboard apropiado
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.role) {
+      const currentPath = request.nextUrl.pathname
+      
+      // Si es propietario y no está en su dashboard, redirigir
+      if (profile.role === 'propietario' && !currentPath.startsWith('/dashboard/propietario')) {
+        return NextResponse.redirect(new URL('/dashboard/propietario', request.url))
+      }
+      
+      // Si es inversionista y no está en su dashboard, redirigir
+      if (profile.role === 'inversionista' && !currentPath.startsWith('/dashboard/inversionista')) {
+        return NextResponse.redirect(new URL('/dashboard/inversionista', request.url))
+      }
+      
+      // Si es admin y no está en su dashboard, redirigir
+      if (profile.role === 'admin' && !currentPath.startsWith('/dashboard/admin')) {
+        return NextResponse.redirect(new URL('/dashboard/admin', request.url))
+      }
+    }
+  }
+
   return response
 }
 
