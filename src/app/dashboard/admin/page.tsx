@@ -109,8 +109,24 @@ export default async function AdminDashboard() {
         {recentInvestments && recentInvestments.length > 0 ? (
           <div className="space-y-4">
             {recentInvestments.map((investment) => {
-              const investor = investment.investor as { full_name: string; email: string } | null
-              const loan = investment.loan as { code: string; property_info: { city?: string } | null } | null
+              // Supabase puede devolver objeto o array dependiendo de la relación
+              const investorData = investment.investor
+              const loanData = investment.loan
+
+              // Extraer datos del inversor
+              const investorName = Array.isArray(investorData)
+                ? investorData[0]?.full_name || investorData[0]?.email
+                : (investorData as { full_name?: string; email?: string } | null)?.full_name ||
+                  (investorData as { full_name?: string; email?: string } | null)?.email
+
+              // Extraer datos del préstamo
+              const loanCode = Array.isArray(loanData)
+                ? loanData[0]?.code
+                : (loanData as { code?: string } | null)?.code
+
+              const loanCity = Array.isArray(loanData)
+                ? loanData[0]?.property_info?.city
+                : (loanData as { property_info?: { city?: string } } | null)?.property_info?.city
 
               return (
                 <div key={investment.id} className="flex items-center justify-between p-4 bg-slate-700/50 rounded-xl">
@@ -120,11 +136,11 @@ export default async function AdminDashboard() {
                     </div>
                     <div>
                       <p className="text-white font-medium">
-                        {investor?.full_name || investor?.email || 'Usuario'}
+                        {investorName || 'Usuario'}
                       </p>
                       <p className="text-slate-400 text-sm">
-                        Invirtió en {loan?.code || 'Crédito'}
-                        {loan?.property_info?.city ? ` - ${loan.property_info.city}` : ''}
+                        Invirtió en {loanCode || 'Crédito'}
+                        {loanCity ? ` - ${loanCity}` : ''}
                       </p>
                     </div>
                   </div>
