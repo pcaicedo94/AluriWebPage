@@ -54,29 +54,12 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // 1. Verificar sesión
+  // Verificar sesión
   const { data: { user } } = await supabase.auth.getUser()
 
-  // 2. Si no está logueado y quiere entrar al dashboard, mandar al login
+  // Si no está logueado y quiere entrar al dashboard, mandar al login
   if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/login', request.url))
-  }
-
-  // 3. CONTROL DE ROLES (Aquí evitamos la confusión)
-  if (user) {
-    // Obtenemos el rol desde los metadatos del usuario
-    // (Asegúrate de guardar el rol en user_metadata al registrarse)
-    const role = user.user_metadata.role || 'investor';
-
-    // REGLA: El Admin NO debe estar en rutas de Inversionista
-    if (role === 'admin' && request.nextUrl.pathname.startsWith('/dashboard/inversionista')) {
-       return NextResponse.redirect(new URL('/dashboard/admin/colocaciones', request.url))
-    }
-
-    // REGLA: El Inversionista NO debe estar en rutas de Admin
-    if (role !== 'admin' && request.nextUrl.pathname.startsWith('/dashboard/admin')) {
-       return NextResponse.redirect(new URL('/dashboard/inversionista', request.url))
-    }
   }
 
   return response

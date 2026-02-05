@@ -24,29 +24,21 @@ export async function login(formData: FormData) {
     return { error: 'Credenciales inválidas' }
   }
 
-  // Fetch user role from profiles table
-  const { data: profile, error: profileError } = await supabase
+  // Consultar rol del usuario
+  const { data: profile } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', data.user.id)
     .single()
 
-  if (profileError || !profile) {
-    await supabase.auth.signOut()
-    return { error: 'Error al verificar el perfil de usuario' }
-  }
-
-  // Success - revalidate and redirect to appropriate dashboard
+  // Revalidate cache
   revalidatePath('/', 'layout')
-  if (profile.role === 'admin') {
-    redirect('/dashboard/admin/usuarios')
-  } else if (profile.role === 'inversionista') {
-    redirect('/dashboard/inversionista')
-  } else if (profile.role === 'propietario') {
-    redirect('/dashboard/propietario')
+
+  // Redirect según rol
+  if (profile?.role === 'admin') {
+    redirect('/dashboard/admin/colocaciones')
   } else {
-    await supabase.auth.signOut()
-    return { error: 'Rol de usuario desconocido. Contacta soporte.' }
+    redirect('/dashboard/inversionista/mis-inversiones')
   }
 }
 
