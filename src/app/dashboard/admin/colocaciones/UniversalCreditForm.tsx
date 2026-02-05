@@ -140,7 +140,7 @@ export default function UniversalCreditForm({ investors, nextCode }: UniversalCr
       aluri_commission_pct: 0,
       property_address: '',
       property_city: '',
-      property_type: 'urbano',
+      property_type: 'casa',
       commercial_value: 0,
       investors: []
     }
@@ -455,7 +455,7 @@ export default function UniversalCreditForm({ investors, nextCode }: UniversalCr
         aluri_commission_pct: 0,
         property_address: '',
         property_city: '',
-        property_type: 'urbano',
+        property_type: 'casa',
         commercial_value: 0,
         investors: []
       })
@@ -685,9 +685,13 @@ export default function UniversalCreditForm({ investors, nextCode }: UniversalCr
                     <label className="block text-sm text-slate-400 mb-1.5">Tipo de Predio</label>
                     <select {...register('property_type')}
                       className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-teal-500">
-                      <option value="urbano">Urbano</option>
-                      <option value="rural">Rural</option>
-                      <option value="comercial">Comercial</option>
+                      <option value="casa">Casa</option>
+                      <option value="apartamento">Apartamento</option>
+                      <option value="lote">Lote</option>
+                      <option value="predio_rural">Predio Rural</option>
+                      <option value="oficina">Oficina</option>
+                      <option value="bodega">Bodega</option>
+                      <option value="local_comercial">Local Comercial</option>
                     </select>
                   </div>
                   <div>
